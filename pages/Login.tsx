@@ -62,7 +62,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, error, opds, progress, news }) =
 
   // Efek Auto-Scroll untuk Mode TV (Tabel Utama & Daftar Sukses)
   useEffect(() => {
-    if ((activeView as string) !== 'tv') return;
+    if (activeView !== 'tv') return;
     
     const tableContainer = scrollRef.current;
     const successContainer = successScrollRef.current;
@@ -143,10 +143,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, error, opds, progress, news }) =
       return { name: opd?.name || 'Unknown' };
     });
 
-  const statusCounts = {
-    critical: progress.filter(p => Math.round(((p.todayPenyediaPagu + p.todaySwakelolaPagu + p.todayPdSPagu) / (p.paguTarget || 1)) * 100) <= 50).length,
-    success: completedOPDs.length,
-  };
+  const criticalOPDsCount = progress.filter(p => (p.todayPenyediaPagu + p.todaySwakelolaPagu + p.todayPdSPagu) / (p.paguTarget || 1) < 0.5).length;
 
   const getPageNumbers = () => {
     const pages = [];
@@ -165,16 +162,16 @@ const Login: React.FC<LoginProps> = ({ onLogin, error, opds, progress, news }) =
   };
 
   return (
-    <div className={`min-h-screen font-sans flex flex-col relative overflow-hidden transition-colors duration-500 ${(activeView as string) === 'login' || (activeView as string) === 'tv' ? 'bg-slate-950' : 'bg-slate-50'}`}>
+    <div className={`min-h-screen font-sans flex flex-col relative overflow-hidden transition-colors duration-500 ${activeView === 'login' || activeView === 'tv' ? 'bg-slate-950' : 'bg-slate-50'}`}>
       
       {/* Background Image: Hidden in TV Mode */}
-      {(activeView as string) !== 'tv' && (
+      {activeView !== 'tv' && (
         <>
           <div 
             className="absolute inset-0 z-0 bg-cover bg-center animate-in fade-in duration-1000"
             style={{ 
               backgroundImage: 'url("https://storage.ntbprov.go.id/biropbj/media/kantor-gub.jpg")',
-              filter: (activeView as string) === 'login' ? 'brightness(0.3) saturate(0.5)' : 'brightness(1) opacity(0.03)'
+              filter: activeView === 'login' ? 'brightness(0.3) saturate(0.5)' : 'brightness(1) opacity(0.03)'
             }}
           />
           <div className="absolute inset-0 z-[1] opacity-5 pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
@@ -184,8 +181,8 @@ const Login: React.FC<LoginProps> = ({ onLogin, error, opds, progress, news }) =
       {/* Content Wrapper */}
       <div className="relative z-10 min-h-screen flex flex-col">
         {/* Navbar Atas */}
-        {(activeView as string) !== 'tv' && (
-          <nav className={`h-[60px] flex items-center justify-between px-6 shrink-0 shadow-xl border-b sticky top-0 z-50 transition-all ${(activeView as string) === 'login' ? 'bg-black/40 backdrop-blur-xl text-white border-white/10' : 'bg-slate-900 text-white border-slate-800'}`}>
+        {activeView !== 'tv' && (
+          <nav className={`h-[60px] flex items-center justify-between px-6 shrink-0 shadow-xl border-b sticky top-0 z-50 transition-all ${activeView === 'login' ? 'bg-black/40 backdrop-blur-xl text-white border-white/10' : 'bg-slate-900 text-white border-slate-800'}`}>
             <div className="flex items-center h-full">
               <div className="bg-[#d9534f] h-full px-6 flex items-center skew-x-[-20deg] -ml-6 mr-8 cursor-pointer group hover:bg-red-700 transition-colors" onClick={() => setActiveView('login')}>
                 <div className="skew-x-[20deg] flex items-center gap-2">
@@ -247,10 +244,12 @@ const Login: React.FC<LoginProps> = ({ onLogin, error, opds, progress, news }) =
           {/* VIEW: TV MONITOR */}
           {activeView === 'tv' && (
             <div className="fixed inset-0 z-[100] bg-[#020617] text-white flex flex-col p-6 space-y-6 animate-in fade-in duration-500 overflow-hidden">
+               {/* Close Button untuk kembali ke menu Login */}
                <button onClick={() => setActiveView('login')} className="absolute top-4 left-4 p-3 bg-white/5 hover:bg-white/10 rounded-full text-white/40 hover:text-white transition-all z-[110]">
                   <X size={24} />
                </button>
 
+               {/* HEADER */}
                <div className="flex items-center justify-between border-b border-white/10 pb-6 shrink-0">
                 <div className="flex items-center gap-6 ml-12">
                   <div className="bg-[#d9534f] p-4 rounded-2xl shadow-lg shadow-red-900/40">
@@ -286,19 +285,24 @@ const Login: React.FC<LoginProps> = ({ onLogin, error, opds, progress, news }) =
                 </div>
               </div>
 
+              {/* STATS CARDS */}
               <div className="grid grid-cols-4 gap-6 shrink-0">
-                <MonitorCardTV label="Capaian Provinsi" value={formatPercent(avgPercent)} sub="Target Realisasi Pagu" icon={<Percent size={32}/>} color="emerald" />
+                <MonitorCardTV label="Total Progres Provinsi" value={formatPercent(avgPercent)} sub="Realisasi Input Pagu Nasional" icon={<Percent size={32}/>} color="emerald" />
                 <MonitorCardTV label="Pagu Terumumkan" value={`Rp ${formatCurrencyMillions(totalPaguTerinput)} Jt`} sub={`Target: Rp ${formatCurrencyMillions(totalPaguMurni)} Jt`} icon={<TrendingUp size={32}/>} color="blue" />
-                <MonitorCardTV label="Volume Paket RUP" value={totalPaket.toLocaleString('id-ID')} sub="Total Pen + Swa + PdS" icon={<Package size={32}/>} color="indigo" />
-                <MonitorCardTV label="Satker Tuntas (100%)" value={`${statusCounts.success} OPD`} sub="Telah Menyelesaikan Input" icon={<Award size={32}/>} color="amber" />
+                <MonitorCardTV label="Total Paket RUP" value={totalPaket.toLocaleString('id-ID')} sub="Pen + Swa + PdS" icon={<Package size={32}/>} color="indigo" />
+                <MonitorCardTV label="Satker Tuntas (100%)" value={`${completedOPDs.length} OPD`} sub="Penyelesaian Input RUP" icon={<Award size={32}/>} color="amber" />
               </div>
 
+              {/* MAIN CONTENT SPLIT */}
               <div className="flex-1 min-h-0 flex gap-6 overflow-hidden">
+                
+                {/* LEFT: LIST OPD TUNTAS & WARNING */}
                 <div className="w-1/3 flex flex-col space-y-4 overflow-hidden">
                   <div className="bg-slate-900/50 border border-white/5 p-6 rounded-[2.5rem] flex-1 flex flex-col overflow-hidden">
-                    <h3 className="text-xl font-black uppercase tracking-widest text-slate-400 mb-8 flex items-center gap-3 shrink-0">
+                    <h3 className="text-xl font-black uppercase tracking-widest text-slate-400 mb-6 flex items-center gap-3 shrink-0">
                       <CheckCircle2 className="text-emerald-500" /> OPD INPUT 100%
                     </h3>
+                    
                     <div ref={successScrollRef} className="flex-1 overflow-y-auto space-y-3 pr-2 scroll-smooth no-scrollbar">
                       {completedOPDs.length > 0 ? completedOPDs.map((item, idx) => (
                         <div key={idx} className="bg-emerald-500/5 border border-emerald-500/10 p-4 rounded-2xl flex items-start gap-3 group hover:bg-emerald-500/10 transition-colors">
@@ -316,17 +320,25 @@ const Login: React.FC<LoginProps> = ({ onLogin, error, opds, progress, news }) =
                     {/* Legend info */}
                     <div className="mt-6 pt-4 border-t border-white/5 text-[10px] font-black text-emerald-500/60 uppercase tracking-widest flex items-center gap-2 shrink-0">
                        <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
-                       Target Realisasi Tercapai
+                       Pencapaian Target Realisasi
                     </div>
+                  </div>
+
+                  <div className="bg-gradient-to-br from-red-600/20 to-transparent border border-red-500/20 p-6 rounded-[2.5rem] shrink-0">
+                    <h4 className="font-black text-red-500 uppercase tracking-widest text-xs mb-2">Peringatan Sistem</h4>
+                    <p className="text-slate-300 text-sm leading-relaxed italic">
+                      Ditemukan <strong>{criticalOPDsCount} OPD</strong> dengan progres di bawah 50%. Diperlukan atensi pimpinan untuk percepatan input RUP.
+                    </p>
                   </div>
                 </div>
 
+                {/* RIGHT: AUTO-SCROLLING TABLE */}
                 <div className="flex-1 bg-slate-900/50 border border-white/5 rounded-[2.5rem] flex flex-col overflow-hidden relative shadow-inner">
                    <div className="absolute top-0 left-0 right-0 h-16 bg-slate-900/80 backdrop-blur-md z-10 flex items-center px-8 border-b border-white/5">
                       <div className="grid grid-cols-12 w-full text-[10px] font-black uppercase tracking-widest text-slate-500">
                          <div className="col-span-1">No</div>
-                         <div className="col-span-7">Satuan Kerja</div>
-                         <div className="col-span-2 text-right">Pagu Target</div>
+                         <div className="col-span-6">Satuan Kerja</div>
+                         <div className="col-span-3 text-right">Pagu Target</div>
                          <div className="col-span-2 text-right">Progres</div>
                       </div>
                    </div>
@@ -339,10 +351,10 @@ const Login: React.FC<LoginProps> = ({ onLogin, error, opds, progress, news }) =
                           return (
                             <div key={item.opdId} className="grid grid-cols-12 w-full py-5 items-center hover:bg-white/5 transition-colors">
                               <div className="col-span-1 text-slate-600 font-black text-xs">{idx + 1}</div>
-                              <div className="col-span-7 font-bold text-slate-300 uppercase text-xs truncate pr-4">{opd?.name}</div>
-                              <div className="col-span-2 text-right text-slate-400 font-bold text-xs">Rp {formatCurrencyMillions(item.paguTarget)} Jt</div>
+                              <div className="col-span-6 font-bold text-slate-300 uppercase text-xs truncate pr-4">{opd?.name}</div>
+                              <div className="col-span-3 text-right text-slate-400 font-bold tabular-nums text-xs">Rp {formatCurrencyMillions(item.paguTarget)} Jt</div>
                               <div className="col-span-2 text-right">
-                                 <span className={`px-4 py-1.5 rounded-xl font-black text-xs ${getStatusBgClass(pct)}`}>
+                                 <span className={`px-4 py-1.5 rounded-xl font-black text-xs tabular-nums ${getStatusBgClass(pct)}`}>
                                    {Math.round(pct)}%
                                  </span>
                               </div>
@@ -351,8 +363,38 @@ const Login: React.FC<LoginProps> = ({ onLogin, error, opds, progress, news }) =
                         })}
                       </div>
                    </div>
+                   {/* Gradient Overlays for better depth */}
+                   <div className="absolute top-16 left-0 right-0 h-12 bg-gradient-to-b from-slate-900 to-transparent pointer-events-none z-10 opacity-50"></div>
+                   <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-slate-900 to-transparent pointer-events-none z-10 opacity-50"></div>
                 </div>
               </div>
+
+              {/* FOOTER: RUNNING TEXT */}
+              <div className="h-16 bg-slate-900 border border-white/10 rounded-2xl flex items-center overflow-hidden shrink-0">
+                <div className="bg-[#d9534f] h-full flex items-center px-8 font-black uppercase tracking-widest text-white shrink-0 z-20 relative shadow-2xl skew-x-[-20deg] -ml-4 pr-12">
+                  <span className="skew-x-[20deg] flex items-center gap-3">
+                    <ArrowUpRight size={20} /> NEWS & UPDATES
+                  </span>
+                </div>
+                <div className="flex-1 flex items-center relative z-10 overflow-hidden">
+                  <div className="animate-marquee whitespace-nowrap flex items-center gap-12 font-bold text-slate-200">
+                    {news.map((n, i) => (
+                      <span key={i} className="flex items-center gap-4">
+                        <span className="w-2 h-2 bg-[#d9534f] rounded-full"></span>
+                        {n.title.toUpperCase()}: {n.excerpt.substring(0, 100)}...
+                      </span>
+                    ))}
+                    {/* Repeat for seamless loop */}
+                    {news.map((n, i) => (
+                      <span key={`dup-${i}`} className="flex items-center gap-4">
+                        <span className="w-2 h-2 bg-[#d9534f] rounded-full"></span>
+                        {n.title.toUpperCase()}: {n.excerpt.substring(0, 100)}...
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
               <style>{`
                 @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } } 
                 .animate-marquee { animation: marquee 60s linear infinite; } 
@@ -417,7 +459,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, error, opds, progress, news }) =
                 <StatBox title="Total Pagu Terinput" value={`Rp ${formatCurrencyMillions(totalPaguTerinput)} Jt`} icon={<TrendingUp size={24}/>} color="blue" />
                 <StatBox title="Total Paket" value={totalPaket.toLocaleString('id-ID')} icon={<Package size={24}/>} color="indigo" />
                 <StatBox title="Rata-rata Progres" value={formatPercent(avgPercent)} icon={<Percent size={24}/>} color="emerald" />
-                <StatBox title="OPD Perlu Atensi" value={`${statusCounts.critical} SKPD`} icon={<AlertCircle size={24}/>} color="rose" />
+                <StatBox title="OPD Perlu Atensi" value={`${criticalOPDsCount} SKPD`} icon={<AlertCircle size={24}/>} color="rose" />
               </div>
 
               <div className="bg-white/90 backdrop-blur-md rounded-3xl shadow-xl border border-slate-200 overflow-hidden">
@@ -533,9 +575,9 @@ const Login: React.FC<LoginProps> = ({ onLogin, error, opds, progress, news }) =
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-5xl mx-auto">
                 <div className="space-y-10">
-                  <ContactItem icon={<MapPin size={28} />} title="Alamat Kantor" text="Kantor Gubernur NTB, Biro Pengadaan Barang dan Jasa, Jl. Pejanggik No. 12, Mataram" color="blue" />
-                  <ContactItem icon={<Phone size={28} />} title="Hotline Monitoring" text="(0370) 625274 • Senin - Jumat: 08:00 - 16:00 WITA" color="emerald" />
-                  <ContactItem icon={<Mail size={28} />} title="Email" text="biropbj@ntbprov.go.id • helpdesk.lpsentb@gmail.com" color="rose" />
+                  <ContactItem icon={<MapPin size={28} />} title="Kantor Pusat" text="Kantor Gubernur NTB, Biro Pengadaan Barang dan Jasa, Jl. Pejanggik No. 12, Mataram" color="blue" />
+                  <ContactItem icon={<Phone size={28} />} title="Hotline Monitoring" text="(0370) 6211234 • Senin - Jumat: 08:00 - 16:00 WITA" color="emerald" />
+                  <ContactItem icon={<Mail size={28} />} title="Surel Elektronik" text="biropbj@ntbprov.go.id • helpdesk.sirup@ntbprov.go.id" color="rose" />
                 </div>
                 <div className="bg-slate-900 text-white p-12 rounded-[3.5rem] shadow-2xl space-y-8 relative overflow-hidden">
                   <div className="absolute top-0 right-0 p-8 opacity-5"><ShieldCheck size={120} /></div>
@@ -544,7 +586,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, error, opds, progress, news }) =
                     <h3 className="text-2xl font-black uppercase tracking-tight italic">Helpdesk <span className="text-emerald-400">Whatsapp</span></h3>
                   </div>
                   <p className="text-slate-400 font-medium leading-relaxed">Tim Helpdesk kami siap membantu Anda terkait kendala teknis input RUP, sinkronisasi SIPD, atau verifikasi data OPD.</p>
-                  <a href="https://wa.me/6281139011909" target="_blank" className="flex items-center justify-center gap-3 w-full bg-emerald-500 text-white py-5 rounded-[2rem] font-black uppercase tracking-widest hover:bg-emerald-600 transition-all shadow-xl shadow-emerald-900/20 active:scale-95">Chat Admin Sekarang</a>
+                  <a href="https://wa.me/6281234567890" target="_blank" className="flex items-center justify-center gap-3 w-full bg-emerald-500 text-white py-5 rounded-[2rem] font-black uppercase tracking-widest hover:bg-emerald-600 transition-all shadow-xl shadow-emerald-900/20 active:scale-95">Chat Admin Sekarang</a>
                 </div>
               </div>
             </div>
