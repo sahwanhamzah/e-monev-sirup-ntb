@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { Printer, Search, FileSpreadsheet } from 'lucide-react';
 import { OPD, ProgressData, SystemSettings } from '../types';
@@ -24,7 +25,7 @@ const OfficialReport: React.FC<OfficialReportProps> = ({ opds, progress, setting
     });
   }, [progress, opds, searchTerm]);
 
-  // Pagination Logic (Hanya untuk tampilan layar)
+  // Pagination Logic (Hanya untuk tampilan layar agar tidak berat)
   const totalEntries = filteredData.length;
   const totalPages = Math.ceil(totalEntries / pageSize);
   const paginatedData = useMemo(() => {
@@ -68,9 +69,9 @@ const OfficialReport: React.FC<OfficialReportProps> = ({ opds, progress, setting
     return pages;
   };
 
-  // Komponen Tabel Inti
+  // Komponen Tabel Inti yang digunakan baik di layar maupun cetak
   const ReportTableContent = ({ data, startIdx }: { data: ProgressData[], startIdx: number }) => (
-    <table className="w-full text-[8.5px] md:text-[9.5px] border-collapse border border-black leading-tight">
+    <table className="w-full text-[8.5px] md:text-[9.5px] border-collapse border border-black leading-tight bg-white">
       <thead>
         <tr className="bg-[#FFC000] text-center font-bold">
           <th rowSpan={3} className="border border-black p-1 w-6">No.</th>
@@ -84,7 +85,7 @@ const OfficialReport: React.FC<OfficialReportProps> = ({ opds, progress, setting
           <th colSpan={2} className="border border-black p-1">Penyedia</th>
           <th colSpan={2} className="border border-black p-1">Swakelola</th>
           <th colSpan={2} className="border border-black p-1">PdS</th>
-          <th colSpan={2} className="border border-black p-1">Total</th>
+          <th colSpan={2} className="border border-black p-1 text-white bg-[#00B0F0]">Total</th>
         </tr>
         <tr className="bg-[#FFC000] text-center font-bold text-[7.5px] md:text-[8px]">
           <th className="border border-black p-0.5 w-8">Paket</th>
@@ -93,8 +94,8 @@ const OfficialReport: React.FC<OfficialReportProps> = ({ opds, progress, setting
           <th className="border border-black p-0.5 w-16">Pagu</th>
           <th className="border border-black p-0.5 w-8">Paket</th>
           <th className="border border-black p-0.5 w-16">Pagu</th>
-          <th className="border border-black p-0.5 w-8">Paket</th>
-          <th className="border border-black p-0.5 w-16">Pagu</th>
+          <th className="border border-black p-0.5 w-8 text-white bg-[#00B0F0]">Paket</th>
+          <th className="border border-black p-0.5 w-16 text-white bg-[#00B0F0]">Pagu</th>
         </tr>
       </thead>
       <tbody>
@@ -128,8 +129,8 @@ const OfficialReport: React.FC<OfficialReportProps> = ({ opds, progress, setting
         })}
       </tbody>
       <tfoot className="bg-[#D9EAD3] font-bold text-right">
-        <tr>
-          <td colSpan={2} className="border border-black p-1 text-center uppercase tracking-widest">TOTAL PROVINSI</td>
+        <tr className="border-t-2 border-black">
+          <td colSpan={2} className="border border-black p-1 text-center uppercase tracking-widest font-black">TOTAL PROVINSI</td>
           <td className="border border-black p-1">{formatReportNumber(totals.paguTarget)}</td>
           <td className="border border-black p-1">{formatReportNumber(totals.todayPenPaket)}</td>
           <td className="border border-black p-1">{formatReportNumber(totals.todayPenPagu)}</td>
@@ -152,7 +153,7 @@ const OfficialReport: React.FC<OfficialReportProps> = ({ opds, progress, setting
     <div className="space-y-6">
       <div className="no-print flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900">Laporan Resmi</h2>
+          <h2 className="text-2xl font-bold text-slate-900 uppercase">Laporan Resmi Monitoring</h2>
           <p className="text-slate-500">Monitoring progres input SiRUP NTB {settings.ta}</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
@@ -165,9 +166,11 @@ const OfficialReport: React.FC<OfficialReportProps> = ({ opds, progress, setting
 
       <div className="bg-white p-4 md:p-8 shadow-sm border border-slate-200 rounded-lg print-container">
         {/* Main Header */}
-        <div className="text-center mb-6">
-          <h1 className="text-sm md:text-lg font-bold uppercase tracking-tight">PROGRES RENCANA UMUM PENGADAAN (RUP) APBD PEMPROV NTB TA. {settings.ta}</h1>
-          <div className="bg-red-600 text-white inline-block px-4 py-1 mt-2 font-bold text-[10px] md:text-xs rounded tracking-wide shadow-sm">
+        <div className="text-center mb-8">
+          <h1 className="text-sm md:text-lg font-black uppercase tracking-tight leading-tight">
+            PROGRES RENCANA UMUM PENGADAAN (RUP) APBD PEMPROV NTB TA. {settings.ta}
+          </h1>
+          <div className="bg-red-600 text-white inline-block px-5 py-1.5 mt-4 font-black text-[10px] md:text-xs rounded shadow-sm tracking-widest no-print">
             {getCurrentTimestamp()}
           </div>
         </div>
@@ -240,30 +243,30 @@ const OfficialReport: React.FC<OfficialReportProps> = ({ opds, progress, setting
             <div className="mt-6 space-y-1.5">
               <p className="font-bold underline uppercase tracking-widest text-[9px] mb-1">Keterangan Warna :</p>
               <div className="flex items-center gap-2">
-                <div className="w-4 h-2.5 bg-[#FF0000] border border-black"></div> 
-                <span>0% - 50% (Atensi)</span>
+                <div className="w-5 h-3 bg-[#FF0000] border border-black"></div> 
+                <span className="font-medium">0% - 50% (Atensi)</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-4 h-2.5 bg-[#FFFF00] border border-black"></div> 
-                <span>51% - 99% (Sedang)</span>
+                <div className="w-5 h-3 bg-[#FFFF00] border border-black"></div> 
+                <span className="font-medium">51% - 99% (Sedang)</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-4 h-2.5 bg-[#00B050] border border-black"></div> 
-                <span>100% (Sesuai)</span>
+                <div className="w-5 h-3 bg-[#00B050] border border-black"></div> 
+                <span className="font-medium">100% (Sesuai)</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-4 h-2.5 bg-[#00B0F0] border border-black"></div> 
-                <span>&gt;100% (Kelebihan)</span>
+                <div className="w-5 h-3 bg-[#00B0F0] border border-black"></div> 
+                <span className="font-medium">&gt;100% (Kelebihan)</span>
               </div>
             </div>
           </div>
 
-          <div className="text-center w-64 md:w-72">
-            <p className="mb-16 uppercase leading-relaxed font-medium">
+          <div className="text-center w-64 md:w-80">
+            <p className="mb-20 uppercase leading-relaxed font-bold">
               Mataram, {new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}<br />
               {settings.pejabatJabatan},
             </p>
-            <p className="font-bold underline uppercase tracking-tight text-[11px] mb-0.5">{settings.pejabatNama}</p>
+            <p className="font-black underline uppercase tracking-tight text-[11px] mb-1">{settings.pejabatNama}</p>
             <p className="font-bold text-[10px]">NIP. {settings.pejabatNip}</p>
           </div>
         </div>
