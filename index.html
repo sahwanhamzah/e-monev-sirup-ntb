@@ -14,91 +14,86 @@
         @media print {
             @page { 
                 size: A4 landscape; 
-                margin: 1cm;
+                margin: 0.5cm;
             }
             
-            /* PENTING: Reset total layout agar tidak ada container yang membatasi tinggi */
-            html, body {
+            /* RESET TOTAL UNTUK SEMUA ELEMEN INDUK */
+            html, body, #root, #root > div, main, div[class*="flex"], .print-container, .max-w-7xl {
                 height: auto !important;
+                min-height: auto !important;
+                max-height: none !important;
                 overflow: visible !important;
-                background: white !important;
-                color: black !important;
-                margin: 0 !important;
-                padding: 0 !important;
-            }
-
-            /* Sembunyikan elemen UI aplikasi agar tidak ikut tercetak */
-            .no-print, aside, header, nav, footer, button, .toast-container { 
-                display: none !important; 
-            }
-
-            /* Paksa semua container untuk meluas mengikuti konten tabel */
-            #root, #root > div, main, .max-w-7xl, .print-container {
-                height: auto !important;
-                overflow: visible !important;
-                display: block !important;
-                padding: 0 !important;
-                margin: 0 !important;
+                display: block !important; /* Ubah flexbox menjadi block agar tidak terpotong */
                 width: 100% !important;
-                position: static !important;
-                transform: none !important;
+                float: none !important;
+                position: relative !important;
+                margin: 0 !important;
+                padding: 0 !important;
                 box-shadow: none !important;
+                transform: none !important;
             }
-            
-            /* Tampilkan elemen khusus cetak */
+
+            /* Sembunyikan elemen UI aplikasi */
+            .no-print, nav, aside, header, footer, button, .toast-container, .bg-slate-50\/50, .fixed, .sticky { 
+                display: none !important; 
+                position: absolute !important; /* Mencegah elemen tetap mengambil ruang */
+                visibility: hidden !important;
+            }
+
+            /* Paksa area konten cetak tampil */
             .print-only { 
                 display: block !important; 
+                visibility: visible !important;
+                width: 100% !important;
             }
-            
-            /* Reset Visual Elemen Laporan */
-            .shadow-sm, .shadow-md, .shadow-lg, .shadow-xl, .shadow-2xl { box-shadow: none !important; }
-            .rounded-lg, .rounded-2xl, .rounded-3xl, .rounded-[2rem], .rounded-[2.5rem] { border-radius: 0 !important; }
-            .border { border: none !important; }
-            
-            /* Pengaturan Tabel Multi-Halaman */
+
+            /* Optimasi Tabel Multi-Halaman */
             table { 
                 width: 100% !important;
-                table-layout: auto !important;
-                font-size: 8pt !important; 
                 border-collapse: collapse !important; 
-                color: black !important;
-                page-break-inside: auto; /* Biarkan tabel membelah antar halaman */
-                border: 0.5pt solid black !important;
+                table-layout: auto !important;
+                page-break-inside: auto !important;
+                border: 1pt solid black !important;
+                margin-top: 10px !important;
             }
             
-            thead { display: table-header-group !important; } /* Ulangi header tabel di tiap halaman */
+            thead { display: table-header-group !important; }
             tfoot { display: table-footer-group !important; }
             
             tr { 
-                page-break-inside: avoid !important; /* Jangan membelah baris di tengah */
-                page-break-after: auto;
+                page-break-inside: avoid !important; 
+                page-break-after: auto !important;
             }
             
             th, td { 
                 border: 0.5pt solid black !important; 
-                padding: 4px 2px !important; 
+                padding: 4px !important;
+                font-size: 8pt !important;
+                color: black !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
 
-            /* Paksa warna background tampil saat cetak/PDF */
-            .bg-\[\#FFC000\] { background-color: #FFC000 !important; }
-            .bg-\[\#00B0F0\] { background-color: #00B0F0 !important; color: white !important; }
-            .bg-\[\#D9EAD3\] { background-color: #D9EAD3 !important; }
-            .bg-\[\#FF0000\] { background-color: #FF0000 !important; color: white !important; }
-            .bg-\[\#FFFF00\] { background-color: #FFFF00 !important; color: black !important; }
-            .bg-\[\#00B050\] { background-color: #00B050 !important; color: white !important; }
+            /* Paksa Warna Background Muncul */
+            .bg-\[\#FFC000\] { background-color: #FFC000 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .bg-\[\#00B0F0\] { background-color: #00B0F0 !important; color: white !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .bg-\[\#D9EAD3\] { background-color: #D9EAD3 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .bg-\[\#FF0000\] { background-color: #FF0000 !important; color: white !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .bg-\[\#FFFF00\] { background-color: #FFFF00 !important; color: black !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .bg-\[\#00B050\] { background-color: #00B050 !important; color: white !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 
-            /* Blok Tanda Tangan */
             .signature-block {
-                margin-top: 1.5cm !important;
+                margin-top: 1cm !important;
                 page-break-inside: avoid !important;
-                width: 100% !important;
                 display: flex !important;
                 flex-direction: row !important;
                 justify-content: space-between !important;
                 align-items: flex-start !important;
+                border: none !important;
+                width: 100% !important;
             }
+            
+            h1 { font-size: 14pt !important; line-height: 1.2 !important; }
         }
 
         .print-only { display: none; }
