@@ -52,6 +52,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, error, opds, progress, news }) =
   const [pageSize, setPageSize] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const successScrollRef = useRef<HTMLDivElement>(null);
 
   // Update Jam untuk Mode TV
   useEffect(() => {
@@ -59,27 +60,37 @@ const Login: React.FC<LoginProps> = ({ onLogin, error, opds, progress, news }) =
     return () => clearInterval(timer);
   }, []);
 
-  // Efek Auto-Scroll untuk Mode TV
+  // Efek Auto-Scroll untuk Mode TV (Tabel Utama & Daftar Sukses)
   useEffect(() => {
     if ((activeView as string) !== 'tv') return;
-    const scrollContainer = scrollRef.current;
-    if (!scrollContainer) return;
+    
+    const tableContainer = scrollRef.current;
+    const successContainer = successScrollRef.current;
 
-    let scrollAmount = 0;
-    const scrollStep = 1;
-    const scrollInterval = 40;
+    const createScrollTask = (container: HTMLDivElement | null) => {
+      if (!container) return null;
+      let scrollAmount = 0;
+      const scrollStep = 1;
+      const scrollInterval = 40;
 
-    const scrollTask = setInterval(() => {
-      if (scrollContainer.scrollTop + scrollContainer.clientHeight >= scrollContainer.scrollHeight - 5) {
-        scrollAmount = 0;
-        scrollContainer.scrollTop = 0;
-      } else {
-        scrollAmount += scrollStep;
-        scrollContainer.scrollTop = scrollAmount;
-      }
-    }, scrollInterval);
+      return setInterval(() => {
+        if (container.scrollTop + container.clientHeight >= container.scrollHeight - 5) {
+          scrollAmount = 0;
+          container.scrollTop = 0;
+        } else {
+          scrollAmount += scrollStep;
+          container.scrollTop = scrollAmount;
+        }
+      }, scrollInterval);
+    };
 
-    return () => clearInterval(scrollTask);
+    const tableTask = createScrollTask(tableContainer);
+    const successTask = createScrollTask(successContainer);
+
+    return () => {
+      if (tableTask) clearInterval(tableTask);
+      if (successTask) clearInterval(successTask);
+    };
   }, [activeView, progress]);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -121,22 +132,21 @@ const Login: React.FC<LoginProps> = ({ onLogin, error, opds, progress, news }) =
   );
   const avgPercent = totalPaguMurni > 0 ? (totalPaguTerinput / totalPaguMurni) * 100 : 0;
   
-  const statusCounts = {
-    critical: progress.filter(p => Math.round(((p.todayPenyediaPagu + p.todaySwakelolaPagu + p.todayPdSPagu) / (p.paguTarget || 1)) * 100) <= 50).length,
-    success: progress.filter(p => Math.round(((p.todayPenyediaPagu + p.todaySwakelolaPagu + p.todayPdSPagu) / (p.paguTarget || 1)) * 100) >= 100).length,
-  };
-
-  const topOPDs = progress
+  // Filter OPD yang sudah 100%
+  const completedOPDs = progress
+    .filter(p => {
+      const total = p.todayPenyediaPagu + p.todaySwakelolaPagu + p.todayPdSPagu;
+      return Math.round((total / (p.paguTarget || 1)) * 100) >= 100;
+    })
     .map(p => {
       const opd = opds.find(o => o.id === p.opdId);
-      const total = p.todayPenyediaPagu + p.todaySwakelolaPagu + p.todayPdSPagu;
-      return { 
-        name: opd?.name || 'Unknown', 
-        percent: (total / (p.paguTarget || 1)) * 100 
-      };
-    })
-    .sort((a, b) => b.percent - a.percent)
-    .slice(0, 5);
+      return { name: opd?.name || 'Unknown' };
+    });
+
+  const statusCounts = {
+    critical: progress.filter(p => Math.round(((p.todayPenyediaPagu + p.todaySwakelolaPagu + p.todayPdSPagu) / (p.paguTarget || 1)) * 100) <= 50).length,
+    success: completedOPDs.length,
+  };
 
   const getPageNumbers = () => {
     const pages = [];
@@ -158,7 +168,6 @@ const Login: React.FC<LoginProps> = ({ onLogin, error, opds, progress, news }) =
     <div className={`min-h-screen font-sans flex flex-col relative overflow-hidden transition-colors duration-500 ${(activeView as string) === 'login' || (activeView as string) === 'tv' ? 'bg-slate-950' : 'bg-slate-50'}`}>
       
       {/* Background Image: Hidden in TV Mode */}
-      {/* Fix: use string casting for activeView comparison to avoid narrowing overlap errors in TS */}
       {(activeView as string) !== 'tv' && (
         <>
           <div 
@@ -174,8 +183,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, error, opds, progress, news }) =
 
       {/* Content Wrapper */}
       <div className="relative z-10 min-h-screen flex flex-col">
-        {/* Navbar Atas: Hidden in TV Mode except for back button logic */}
-        {/* Fix: use string casting for activeView comparison to avoid narrowing overlap errors in TS */}
+        {/* Navbar Atas */}
         {(activeView as string) !== 'tv' && (
           <nav className={`h-[60px] flex items-center justify-between px-6 shrink-0 shadow-xl border-b sticky top-0 z-50 transition-all ${(activeView as string) === 'login' ? 'bg-black/40 backdrop-blur-xl text-white border-white/10' : 'bg-slate-900 text-white border-slate-800'}`}>
             <div className="flex items-center h-full">
@@ -236,10 +244,9 @@ const Login: React.FC<LoginProps> = ({ onLogin, error, opds, progress, news }) =
         {/* Main Content Area */}
         <div className={`flex-1 flex flex-col items-center ${activeView === 'login' ? 'justify-center' : 'justify-start pt-12'} px-4 overflow-y-auto custom-scrollbar pb-12`}>
           
-          {/* VIEW: TV MONITOR (DI RENDER SECARA KHUSUS DENGAN THEME DARK) */}
+          {/* VIEW: TV MONITOR */}
           {activeView === 'tv' && (
             <div className="fixed inset-0 z-[100] bg-[#020617] text-white flex flex-col p-6 space-y-6 animate-in fade-in duration-500 overflow-hidden">
-               {/* Back Button for TV Mode */}
                <button onClick={() => setActiveView('login')} className="absolute top-4 left-4 p-3 bg-white/5 hover:bg-white/10 rounded-full text-white/40 hover:text-white transition-all z-[110]">
                   <X size={24} />
                </button>
@@ -287,30 +294,30 @@ const Login: React.FC<LoginProps> = ({ onLogin, error, opds, progress, news }) =
               </div>
 
               <div className="flex-1 min-h-0 flex gap-6 overflow-hidden">
-                <div className="w-1/3 flex flex-col space-y-4">
-                  <div className="bg-slate-900/50 border border-white/5 p-6 rounded-[2.5rem] flex-1">
-                    <h3 className="text-xl font-black uppercase tracking-widest text-slate-400 mb-8 flex items-center gap-3">
-                      <Award className="text-amber-500" /> TOP 5 TERTINGGI
+                <div className="w-1/3 flex flex-col space-y-4 overflow-hidden">
+                  <div className="bg-slate-900/50 border border-white/5 p-6 rounded-[2.5rem] flex-1 flex flex-col overflow-hidden">
+                    <h3 className="text-xl font-black uppercase tracking-widest text-slate-400 mb-8 flex items-center gap-3 shrink-0">
+                      <CheckCircle2 className="text-emerald-500" /> OPD INPUT 100%
                     </h3>
-                    <div className="space-y-8">
-                      {topOPDs.map((item, idx) => (
-                        <div key={idx} className="space-y-3">
-                          <div className="flex justify-between items-end">
-                            <span className="text-sm font-black text-slate-300 uppercase truncate max-w-[200px]">{item.name}</span>
-                            <span className="text-2xl font-black text-white">{Math.round(item.percent)}%</span>
-                          </div>
-                          <div className="h-3 bg-white/5 rounded-full overflow-hidden p-0.5 border border-white/5">
-                            <div className={`h-full rounded-full transition-all duration-1000 ${item.percent >= 100 ? 'bg-emerald-500' : 'bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]'}`} style={{ width: `${Math.min(item.percent, 100)}%` }}></div>
-                          </div>
+                    <div ref={successScrollRef} className="flex-1 overflow-y-auto space-y-3 pr-2 scroll-smooth no-scrollbar">
+                      {completedOPDs.length > 0 ? completedOPDs.map((item, idx) => (
+                        <div key={idx} className="bg-emerald-500/5 border border-emerald-500/10 p-4 rounded-2xl flex items-start gap-3 group hover:bg-emerald-500/10 transition-colors">
+                          <Award className="text-emerald-500 shrink-0 mt-0.5" size={18} />
+                          <span className="text-xs font-black text-slate-200 uppercase leading-relaxed tracking-tight">
+                            {item.name}
+                          </span>
                         </div>
-                      ))}
+                      )) : (
+                        <div className="h-full flex flex-col items-center justify-center text-center p-8 border-2 border-dashed border-white/5 rounded-3xl text-slate-600">
+                           <p className="font-bold uppercase tracking-widest text-xs">Belum ada OPD mencapai 100%</p>
+                        </div>
+                      )}
                     </div>
-                  </div>
-                  <div className="bg-gradient-to-br from-red-600/20 to-transparent border border-red-500/20 p-6 rounded-[2.5rem] shrink-0">
-                     <h4 className="font-black text-red-500 uppercase tracking-widest text-xs mb-2">Peringatan Sistem</h4>
-                     <p className="text-slate-300 text-sm leading-relaxed italic">
-                       Saat ini terdapat <strong>{statusCounts.critical} OPD</strong> dengan progres di bawah 50%. Diperlukan atensi khusus untuk percepatan input RUP.
-                     </p>
+                    {/* Legend info */}
+                    <div className="mt-6 pt-4 border-t border-white/5 text-[10px] font-black text-emerald-500/60 uppercase tracking-widest flex items-center gap-2 shrink-0">
+                       <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                       Target Realisasi Tercapai
+                    </div>
                   </div>
                 </div>
 
@@ -346,18 +353,6 @@ const Login: React.FC<LoginProps> = ({ onLogin, error, opds, progress, news }) =
                    </div>
                 </div>
               </div>
-
-              <div className="h-16 bg-slate-900 border border-white/10 rounded-2xl flex items-center overflow-hidden shrink-0">
-                 <div className="bg-[#d9534f] h-full flex items-center px-8 font-black uppercase tracking-widest text-white skew-x-[-20deg] -ml-4 pr-12 z-20 shadow-2xl">
-                    <span className="skew-x-[20deg] flex items-center gap-3"><ArrowUpRight size={20} /> RUNNING INFO</span>
-                 </div>
-                 <div className="flex-1 flex items-center relative z-10 overflow-hidden">
-                    <div className="animate-marquee whitespace-nowrap flex items-center gap-12 font-bold text-slate-200">
-                       {news.map((n, i) => <span key={i} className="flex items-center gap-4"><span className="w-2 h-2 bg-[#d9534f] rounded-full"></span>{n.title.toUpperCase()}: {n.excerpt.substring(0, 100)}...</span>)}
-                       {news.map((n, i) => <span key={`dup-${i}`} className="flex items-center gap-4"><span className="w-2 h-2 bg-[#d9534f] rounded-full"></span>{n.title.toUpperCase()}: {n.excerpt.substring(0, 100)}...</span>)}
-                    </div>
-                 </div>
-              </div>
               <style>{`
                 @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } } 
                 .animate-marquee { animation: marquee 60s linear infinite; } 
@@ -366,7 +361,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, error, opds, progress, news }) =
             </div>
           )}
 
-          {/* VIEW: LOGIN (GLASSMORPHISM) */}
+          {/* VIEW: LOGIN */}
           {activeView === 'login' && (
             <div className="w-full flex flex-col items-center animate-in zoom-in-95 duration-500">
               <div className="w-full max-w-[420px] bg-black/40 backdrop-blur-xl rounded-[2rem] shadow-2xl p-10 flex flex-col items-center border border-white/10 relative overflow-hidden">
@@ -394,16 +389,6 @@ const Login: React.FC<LoginProps> = ({ onLogin, error, opds, progress, news }) =
                     <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 hover:text-white transition-colors">{showPassword ? <EyeOff size={20} /> : <Eye size={20} />}</button>
                   </div>
                   <button type="submit" className="w-full bg-[#5f8a2a] text-white py-3.5 rounded-xl font-medium text-xl hover:bg-[#4d7022] transition-all shadow-lg active:scale-95 transform mt-2">Log in</button>
-                  <div className="flex justify-between items-center px-1 pt-2">
-                    <label className="flex items-center gap-2 cursor-pointer group">
-                      <div className="relative flex items-center justify-center">
-                        <input type="checkbox" className="peer appearance-none w-5 h-5 border border-white/30 rounded bg-white/10 checked:bg-[#5f8a2a] checked:border-transparent transition-all" />
-                        <CheckCircle2 size={12} className="absolute text-white scale-0 peer-checked:scale-100 transition-transform" />
-                      </div>
-                      <span className="text-sm text-white/60 group-hover:text-white transition-colors">Remember me</span>
-                    </label>
-                    <button type="button" className="text-sm text-white/40 hover:text-white transition-colors">Forgotten password</button>
-                  </div>
                 </form>
               </div>
               
@@ -432,7 +417,6 @@ const Login: React.FC<LoginProps> = ({ onLogin, error, opds, progress, news }) =
                 <StatBox title="Total Pagu Terinput" value={`Rp ${formatCurrencyMillions(totalPaguTerinput)} Jt`} icon={<TrendingUp size={24}/>} color="blue" />
                 <StatBox title="Total Paket" value={totalPaket.toLocaleString('id-ID')} icon={<Package size={24}/>} color="indigo" />
                 <StatBox title="Rata-rata Progres" value={formatPercent(avgPercent)} icon={<Percent size={24}/>} color="emerald" />
-                {/* Fix: use statusCounts.critical instead of undefined criticalCount */}
                 <StatBox title="OPD Perlu Atensi" value={`${statusCounts.critical} SKPD`} icon={<AlertCircle size={24}/>} color="rose" />
               </div>
 
@@ -512,53 +496,57 @@ const Login: React.FC<LoginProps> = ({ onLogin, error, opds, progress, news }) =
 
           {/* VIEW: BERITA */}
           {activeView === 'berita' && (
-            <div className="w-full max-w-6xl animate-in fade-in slide-in-from-bottom-6 duration-700 pb-20">
-              <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-12 border-b border-slate-200/50 pb-8">
-                <div className="flex items-center gap-5">
-                  <div className="p-4 bg-[#d9534f] text-white rounded-3xl shadow-lg"><Newspaper size={40} /></div>
-                  <div><h1 className="text-4xl font-black text-slate-900 tracking-tight">Pengumuman & Update</h1><p className="text-sm text-slate-500 font-bold uppercase tracking-[0.3em]">Informasi Terkini Biro Pengadaan</p></div>
-                </div>
+            <div className="w-full max-w-7xl animate-in fade-in slide-in-from-bottom-6 duration-700 pb-20">
+              <div className="text-center mb-16">
+                <h1 className="text-4xl font-black text-slate-900 mb-4 uppercase tracking-tight">Pengumuman & Update</h1>
+                <p className="text-slate-500 font-bold uppercase tracking-[0.4em]">Informasi Terkini Biro Pengadaan Barang dan Jasa NTB</p>
+                <div className="w-24 h-2 bg-[#d9534f] mx-auto mt-8 rounded-full shadow-lg shadow-red-900/20"></div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {news.length > 0 ? news.map((newsItem) => (
-                  <div key={newsItem.id} onClick={() => setSelectedNews(newsItem)} className="bg-white/90 backdrop-blur-md border border-slate-200 p-8 rounded-[2rem] shadow-md hover:shadow-xl hover:translate-y-[-8px] transition-all duration-500 group cursor-pointer relative overflow-hidden">
-                    <div className="absolute top-0 left-0 w-1.5 h-full bg-[#d9534f] opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                  <div key={newsItem.id} onClick={() => setSelectedNews(newsItem)} className="bg-white rounded-[2.5rem] shadow-xl border border-slate-200 p-8 hover:translate-y-[-10px] transition-all duration-500 cursor-pointer group relative overflow-hidden">
+                    <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity"><Newspaper size={64} /></div>
                     <div className="flex justify-between items-start mb-6">
-                      <span className={`text-[10px] font-black px-3 py-1.5 rounded-xl uppercase tracking-widest ${newsItem.tag === 'Penting' ? 'bg-rose-500 text-white' : newsItem.tag === 'Kegiatan' ? 'bg-blue-500 text-white' : newsItem.tag === 'Update' ? 'bg-emerald-500 text-white' : 'bg-amber-500 text-white'}`}>{newsItem.tag}</span>
-                      <span className="text-xs text-slate-400 font-black tracking-tighter flex items-center gap-1.5"><Calendar size={12} />{newsItem.date}</span>
+                      <span className={`text-[10px] font-black px-4 py-2 rounded-xl uppercase tracking-widest ${newsItem.tag === 'Penting' ? 'bg-red-500 text-white' : 'bg-blue-500 text-white'}`}>{newsItem.tag}</span>
+                      <span className="text-xs text-slate-400 font-black tracking-widest uppercase flex items-center gap-2"><Calendar size={14} />{newsItem.date}</span>
                     </div>
-                    <h3 className="text-xl font-black text-slate-800 mb-4 group-hover:text-[#d9534f] transition-colors leading-tight">{newsItem.title}</h3>
-                    <p className="text-sm text-slate-500 leading-relaxed font-medium line-clamp-4 mb-6">{newsItem.excerpt}</p>
-                    <div className="pt-6 border-t border-slate-100 flex items-center justify-between"><span className="text-xs font-black text-slate-900 flex items-center gap-2 group-hover:translate-x-2 transition-transform">Selengkapnya <ExternalLink size={14} className="text-[#d9534f]" /></span></div>
+                    <h3 className="text-xl font-black text-slate-800 mb-4 group-hover:text-[#d9534f] transition-colors leading-tight line-clamp-2">{newsItem.title}</h3>
+                    <p className="text-sm text-slate-500 leading-relaxed line-clamp-3 mb-8">{newsItem.excerpt}</p>
+                    <div className="pt-6 border-t border-slate-100 flex items-center justify-between">
+                      <span className="text-xs font-black text-slate-900 uppercase tracking-widest flex items-center gap-2 group-hover:translate-x-2 transition-transform">Baca Detail <ExternalLink size={14} className="text-[#d9534f]" /></span>
+                    </div>
                   </div>
-                )) : <div className="col-span-full py-32 text-center text-slate-500 font-black uppercase tracking-widest bg-white/80 border border-dashed border-slate-300 rounded-[3rem]">Belum ada pengumuman baru.</div>}
+                )) : (
+                  <div className="col-span-full py-32 text-center text-slate-400 font-black uppercase tracking-widest bg-white rounded-[3rem] border-2 border-dashed border-slate-200">Belum ada pengumuman tersedia.</div>
+                )}
               </div>
             </div>
           )}
 
           {/* VIEW: KONTAK */}
           {activeView === 'kontak' && (
-            <div className="w-full max-w-5xl animate-in fade-in slide-in-from-bottom-6 duration-700 pb-20">
-               <div className="text-center mb-16"><h1 className="text-5xl font-black text-slate-900 mb-4">Layanan Bantuan</h1><p className="text-slate-500 font-bold uppercase tracking-[0.4em]">Biro Pengadaan Barang dan Jasa Provinsi NTB</p><div className="w-24 h-2 bg-[#d9534f] mx-auto mt-8 rounded-full shadow-lg shadow-red-900/20"></div></div>
-               <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                  <div className="space-y-10">
-                     <ContactItem icon={<MapPin size={28} />} title="Kantor Pusat" text="Kantor Gubernur NTB, Jl. Pejanggik No. 12, Mataram, Nusa Tenggara Barat" color="blue" />
-                     <ContactItem icon={<Phone size={28} />} title="Hotline Monitoring" text="(0370) 625274 • Senin - Jumat: 08:00 - 16:00 WITA" color="emerald" />
-                     <ContactItem icon={<Mail size={28} />} title="Surel Elektronik" text="biropbj@ntbprov.go.id • helpdesk.lpsentb@gmail.com" color="rose" />
+            <div className="w-full max-w-7xl animate-in fade-in slide-in-from-bottom-6 duration-700 pb-20">
+              <div className="text-center mb-20">
+                <h1 className="text-5xl font-black text-slate-900 mb-4 uppercase tracking-tighter">Layanan Bantuan</h1>
+                <p className="text-slate-500 font-bold uppercase tracking-[0.4em]">Hubungi Kami Untuk Informasi Lebih Lanjut</p>
+                <div className="w-24 h-2 bg-[#d9534f] mx-auto mt-8 rounded-full shadow-lg shadow-red-900/20"></div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-5xl mx-auto">
+                <div className="space-y-10">
+                  <ContactItem icon={<MapPin size={28} />} title="Alamat Kantor" text="Kantor Gubernur NTB, Biro Pengadaan Barang dan Jasa, Jl. Pejanggik No. 12, Mataram" color="blue" />
+                  <ContactItem icon={<Phone size={28} />} title="Hotline Monitoring" text="(0370) 625274 • Senin - Jumat: 08:00 - 16:00 WITA" color="emerald" />
+                  <ContactItem icon={<Mail size={28} />} title="Email" text="biropbj@ntbprov.go.id • helpdesk.lpsentb@gmail.com" color="rose" />
+                </div>
+                <div className="bg-slate-900 text-white p-12 rounded-[3.5rem] shadow-2xl space-y-8 relative overflow-hidden">
+                  <div className="absolute top-0 right-0 p-8 opacity-5"><ShieldCheck size={120} /></div>
+                  <div className="flex items-center gap-4 border-b border-white/10 pb-6">
+                    <div className="w-14 h-14 bg-emerald-500/20 text-emerald-400 rounded-2xl flex items-center justify-center"><AlertCircle size={32} /></div>
+                    <h3 className="text-2xl font-black uppercase tracking-tight italic">Helpdesk <span className="text-emerald-400">Whatsapp</span></h3>
                   </div>
-                  <div className="bg-white/90 backdrop-blur-md p-10 rounded-[3rem] shadow-2xl border border-slate-200 space-y-8 relative overflow-hidden group">
-                     <div className="flex items-center gap-4 border-b border-slate-100 pb-6"><div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center"><AlertCircle size={28} /></div><h3 className="text-2xl font-black text-slate-800">Helpdesk LPSE NTB</h3></div>
-                     <p className="text-slate-600 font-medium leading-relaxed">Butuh bantuan teknis terkait penginputan RUP atau integrasi SIPD?</p>
-                     <a href="https://wa.me/6281139011909" target="_blank" className="flex items-center justify-center gap-3 w-full bg-[#25D366] text-white py-5 rounded-2xl font-black uppercase tracking-widest hover:bg-[#1fae53] transition-all shadow-xl shadow-green-900/20 transform border-b-4 border-green-700 active:scale-95">Chat WhatsApp Sekarang</a>
-                  </div>
-               </div>
-            </div>
-          )}
-
-          {activeView !== 'tv' && (
-            <div className={`mt-auto py-8 text-center text-[11px] font-black uppercase tracking-[0.2em] max-w-2xl no-print ${activeView === 'login' ? 'text-white/40 drop-shadow-md' : 'text-slate-500'}`}>
-              Sistem Informasi Monitoring Progres Rencana Umum Pengadaan <br/>
-              Pemerintah Provinsi Nusa Tenggara Barat • Hak Cipta &copy; 2026
+                  <p className="text-slate-400 font-medium leading-relaxed">Tim Helpdesk kami siap membantu Anda terkait kendala teknis input RUP, sinkronisasi SIPD, atau verifikasi data OPD.</p>
+                  <a href="https://wa.me/6281139011909" target="_blank" className="flex items-center justify-center gap-3 w-full bg-emerald-500 text-white py-5 rounded-[2rem] font-black uppercase tracking-widest hover:bg-emerald-600 transition-all shadow-xl shadow-emerald-900/20 active:scale-95">Chat Admin Sekarang</a>
+                </div>
+              </div>
             </div>
           )}
         </div>
@@ -568,16 +556,21 @@ const Login: React.FC<LoginProps> = ({ onLogin, error, opds, progress, news }) =
       {selectedNews && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-md animate-in fade-in duration-300" onClick={() => setSelectedNews(null)}>
           <div className="bg-white w-full max-w-3xl rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]" onClick={(e) => e.stopPropagation()}>
-            <div className={`p-8 text-white flex justify-between items-start shrink-0 ${selectedNews.tag === 'Penting' ? 'bg-[#d9534f]' : selectedNews.tag === 'Kegiatan' ? 'bg-blue-600' : selectedNews.tag === 'Update' ? 'bg-emerald-600' : 'bg-amber-500'}`}>
+            <div className={`p-8 text-white flex justify-between items-start shrink-0 ${selectedNews.tag === 'Penting' ? 'bg-red-500' : 'bg-blue-600'}`}>
               <div className="space-y-4">
                 <span className="inline-block px-4 py-1.5 bg-white/20 backdrop-blur-md rounded-xl text-xs font-black uppercase tracking-widest">{selectedNews.tag}</span>
                 <h2 className="text-3xl font-black leading-tight max-w-2xl">{selectedNews.title}</h2>
-                <div className="flex items-center gap-2 text-sm font-bold text-white/80"><Calendar size={18} />{selectedNews.date}</div>
+                <div className="flex items-center gap-2 text-sm font-bold text-white/80 uppercase tracking-widest"><Calendar size={18} />{selectedNews.date}</div>
               </div>
               <button onClick={() => setSelectedNews(null)} className="p-3 bg-white/10 hover:bg-white/20 rounded-2xl transition-all"><X size={24} /></button>
             </div>
-            <div className="p-8 md:p-12 overflow-y-auto custom-scrollbar flex-1 bg-slate-50/50"><p className="text-lg text-slate-700 leading-relaxed font-medium whitespace-pre-wrap">{selectedNews.excerpt}</p></div>
-            <div className="p-6 bg-white border-t border-slate-100 flex justify-between items-center"><p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Biro Pengadaan Barang & Jasa NTB</p><button onClick={() => setSelectedNews(null)} className="px-8 py-3 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-800 transition-all active:scale-95">Tutup</button></div>
+            <div className="p-10 md:p-14 overflow-y-auto custom-scrollbar flex-1 bg-slate-50/50">
+              <p className="text-lg text-slate-700 leading-relaxed font-medium whitespace-pre-wrap">{selectedNews.excerpt}</p>
+            </div>
+            <div className="p-6 bg-white border-t border-slate-100 flex justify-between items-center">
+              <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Biro Pengadaan Barang & Jasa Prov. NTB</p>
+              <button onClick={() => setSelectedNews(null)} className="px-8 py-3 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-800 transition-all">Tutup</button>
+            </div>
           </div>
         </div>
       )}
@@ -615,8 +608,8 @@ const ContactItem: React.FC<{ icon: React.ReactNode, title: string, text: string
   const lightColors: Record<string, string> = { blue: 'bg-blue-50 text-blue-600', emerald: 'bg-emerald-50 text-emerald-600', rose: 'bg-rose-50 text-rose-600' };
   return (
     <div className="flex gap-6 group">
-      <div className={`shrink-0 w-16 h-16 ${lightColors[color]} rounded-3xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform`}>{icon}</div>
-      <div className="flex flex-col justify-center"><h3 className="font-black text-xl mb-1 text-slate-900">{title}</h3><p className="text-sm font-medium text-slate-600">{text}</p></div>
+      <div className={`shrink-0 w-16 h-16 ${lightColors[color]} rounded-[2rem] flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform`}>{icon}</div>
+      <div className="flex flex-col justify-center"><h3 className="font-black text-xl mb-1 text-slate-900 uppercase tracking-tight">{title}</h3><p className="text-sm font-medium text-slate-600 leading-relaxed">{text}</p></div>
     </div>
   );
 };
