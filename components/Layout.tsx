@@ -69,15 +69,15 @@ const Layout: React.FC<LayoutProps> = ({ children, user, currentPage, onPageChan
   }
 
   return (
-    <div className="min-h-screen flex bg-slate-50 overflow-hidden">
+    <div className="min-h-screen flex bg-slate-50 print:block print:bg-white">
       {/* Backdrop Overlay untuk Mobile */}
       <div 
-        className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] transition-opacity duration-300 lg:hidden ${isSidebarOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+        className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] transition-opacity duration-300 lg:hidden no-print ${isSidebarOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
         onClick={() => setIsSidebarOpen(false)}
       />
 
       {/* Sidebar Off-Canvas */}
-      <aside className={`fixed inset-y-0 left-0 z-[70] w-[280px] bg-[#0f172a] text-white transition-transform duration-300 ease-in-out transform shadow-2xl lg:translate-x-0 lg:static lg:inset-0 lg:shadow-none ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+      <aside className={`fixed inset-y-0 left-0 z-[70] w-[280px] bg-[#0f172a] text-white transition-transform duration-300 ease-in-out transform shadow-2xl lg:translate-x-0 lg:static lg:inset-0 lg:shadow-none no-print ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="flex flex-col h-full">
           {/* Logo Section */}
           <div className="p-8 flex items-center gap-4">
@@ -132,7 +132,7 @@ const Layout: React.FC<LayoutProps> = ({ children, user, currentPage, onPageChan
       </aside>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden print:h-auto print:overflow-visible print:block">
         {/* Header Responsive */}
         <header className="no-print h-[70px] bg-white border-b border-slate-200 flex items-center justify-between px-6 lg:px-10 shrink-0 sticky top-0 z-40">
           <div className="flex items-center gap-4">
@@ -164,8 +164,8 @@ const Layout: React.FC<LayoutProps> = ({ children, user, currentPage, onPageChan
         </header>
 
         {/* Dynamic Page Content */}
-        <main className="flex-1 overflow-y-auto p-4 lg:p-10 bg-slate-50/50 custom-scrollbar">
-          <div className="max-w-7xl mx-auto">
+        <main className="flex-1 overflow-y-auto p-4 lg:p-10 bg-slate-50/50 custom-scrollbar print:p-0 print:overflow-visible print:block print:bg-white">
+          <div className="max-w-7xl mx-auto print:max-w-none print:m-0 print:block">
             {children}
           </div>
         </main>
