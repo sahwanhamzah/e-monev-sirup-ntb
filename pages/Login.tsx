@@ -575,9 +575,9 @@ const Login: React.FC<LoginProps> = ({ onLogin, error, opds, progress, news }) =
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-5xl mx-auto">
                 <div className="space-y-10">
-                  <ContactItem icon={<MapPin size={28} />} title="Kantor Pusat" text="Kantor Gubernur NTB, Biro Pengadaan Barang dan Jasa, Jl. Pejanggik No. 12, Mataram" color="blue" />
-                  <ContactItem icon={<Phone size={28} />} title="Hotline Monitoring" text="(0370) 6211234 • Senin - Jumat: 08:00 - 16:00 WITA" color="emerald" />
-                  <ContactItem icon={<Mail size={28} />} title="Surel Elektronik" text="biropbj@ntbprov.go.id • helpdesk.sirup@ntbprov.go.id" color="rose" />
+                  <ContactItem icon={<MapPin size={28} />} title="Alamat Kantor" text="Kantor Gubernur NTB, Biro Pengadaan Barang dan Jasa, Jl. Pejanggik No. 12, Mataram" color="blue" />
+                  <ContactItem icon={<Phone size={28} />} title="Hotline Monitoring" text="(0370) 625274 • Senin - Jumat: 08:00 - 16:00 WITA" color="emerald" />
+                  <ContactItem icon={<Mail size={28} />} title="Email" text="biropbj@ntbprov.go.id • hhelpdesk.lpsentb@gmail.com" color="rose" />
                 </div>
                 <div className="bg-slate-900 text-white p-12 rounded-[3.5rem] shadow-2xl space-y-8 relative overflow-hidden">
                   <div className="absolute top-0 right-0 p-8 opacity-5"><ShieldCheck size={120} /></div>
@@ -586,7 +586,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, error, opds, progress, news }) =
                     <h3 className="text-2xl font-black uppercase tracking-tight italic">Helpdesk <span className="text-emerald-400">Whatsapp</span></h3>
                   </div>
                   <p className="text-slate-400 font-medium leading-relaxed">Tim Helpdesk kami siap membantu Anda terkait kendala teknis input RUP, sinkronisasi SIPD, atau verifikasi data OPD.</p>
-                  <a href="https://wa.me/6281234567890" target="_blank" className="flex items-center justify-center gap-3 w-full bg-emerald-500 text-white py-5 rounded-[2rem] font-black uppercase tracking-widest hover:bg-emerald-600 transition-all shadow-xl shadow-emerald-900/20 active:scale-95">Chat Admin Sekarang</a>
+                  <a href="https://wa.me/6281139011909" target="_blank" className="flex items-center justify-center gap-3 w-full bg-emerald-500 text-white py-5 rounded-[2rem] font-black uppercase tracking-widest hover:bg-emerald-600 transition-all shadow-xl shadow-emerald-900/20 active:scale-95">Chat Admin Sekarang</a>
                 </div>
               </div>
             </div>
