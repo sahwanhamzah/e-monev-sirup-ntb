@@ -9,72 +9,53 @@
     <style>
         body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
         
-        /* Gaya Khusus Cetak */
+        /* Gaya Khusus Cetak (Aggressive Reset) */
         @media print {
             @page { 
                 size: A4 landscape; 
-                margin: 0.8cm;
+                margin: 1cm;
             }
             
-            /* Penting: Reset total layout agar tidak ada container yang membatasi tinggi */
-            html, body {
+            /* Paksa semua elemen induk untuk tidak membatasi tinggi dan overflow */
+            html, body, #root, #root > div, main, .print-container {
                 height: auto !important;
+                min-height: initial !important;
                 overflow: visible !important;
+                display: block !important;
+                position: static !important;
+                margin: 0 !important;
+                padding: 0 !important;
                 background: white !important;
-                color: black !important;
-                margin: 0 !important;
-                padding: 0 !important;
-                display: block !important;
+                box-shadow: none !important;
+                border: none !important;
             }
 
-            /* Menghilangkan elemen non-laporan */
-            .no-print, aside, header, nav, footer { 
+            .no-print { 
                 display: none !important; 
-            }
-
-            #root, #root > div, main {
-                height: auto !important;
-                overflow: visible !important;
-                display: block !important;
-                padding: 0 !important;
-                margin: 0 !important;
-                width: 100% !important;
             }
             
             .print-only { 
-                display: block !important; 
-            }
-            
-            /* Reset Visual Elemen Laporan */
-            .shadow-sm, .shadow-md, .shadow-lg, .shadow-xl, .shadow-2xl { box-shadow: none !important; }
-            .rounded-lg, .rounded-2xl, .rounded-3xl, .rounded-[2rem], .rounded-[2.5rem] { border-radius: 0 !important; }
-            .border { border: none !important; }
-            
-            .print-container {
                 display: block !important;
                 width: 100% !important;
-                height: auto !important;
-                overflow: visible !important;
-                position: static !important;
-                padding: 0 !important;
-                margin: 0 !important;
-                border: none !important;
-                background: white !important;
             }
             
-            /* Pengaturan Tabel Multi-Halaman */
+            /* Reset Tabel */
             table { 
                 width: 100% !important;
-                table-layout: auto !important;
-                font-size: 7.2pt !important; 
                 border-collapse: collapse !important; 
-                color: black !important;
+                font-size: 8pt !important;
+                line-height: 1.1 !important;
                 page-break-inside: auto;
                 border: 0.5pt solid black !important;
             }
             
-            thead { display: table-header-group !important; }
-            tfoot { display: table-footer-group !important; }
+            thead { 
+                display: table-header-group !important; 
+            }
+            
+            tfoot { 
+                display: table-footer-group !important; 
+            }
             
             tr { 
                 page-break-inside: avoid !important;
@@ -83,12 +64,12 @@
             
             th, td { 
                 border: 0.5pt solid black !important; 
-                padding: 3px 2px !important; 
+                padding: 4px 2px !important; 
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
 
-            /* Warna latar belakang spesifik cetak */
+            /* Warna Background Tabel agar tetap muncul di PDF */
             .bg-\[\#FFC000\] { background-color: #FFC000 !important; }
             .bg-\[\#00B0F0\] { background-color: #00B0F0 !important; color: white !important; }
             .bg-\[\#D9EAD3\] { background-color: #D9EAD3 !important; }
@@ -98,13 +79,13 @@
 
             /* Blok Tanda Tangan */
             .signature-block {
-                margin-top: 1cm !important;
-                page-break-inside: avoid !important;
-                width: 100% !important;
+                margin-top: 1.5cm !important;
                 display: flex !important;
                 flex-direction: row !important;
                 justify-content: space-between !important;
                 align-items: flex-start !important;
+                page-break-inside: avoid !important;
+                width: 100% !important;
             }
         }
 
