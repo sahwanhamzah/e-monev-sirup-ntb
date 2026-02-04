@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { OPD, ProgressData, NewsItem } from '../types';
 import { formatCurrencyMillions, formatPercent, getStatusBgClass } from '../utils';
-import { TrendingUp, Package, Percent, Calendar, ShieldCheck, Clock, ArrowUpRight, Award } from 'lucide-react';
+import { TrendingUp, Package, Percent, Calendar, ShieldCheck, Clock, ArrowUpRight, Award, CheckCircle2 } from 'lucide-react';
 
 interface TVMonitorProps {
   opds: OPD[];
@@ -12,7 +12,8 @@ interface TVMonitorProps {
 
 const TVMonitor: React.FC<TVMonitorProps> = ({ opds, progress, news }) => {
   const [time, setTime] = useState(new Date());
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const tableScrollRef = useRef<HTMLDivElement>(null);
+  const successScrollRef = useRef<HTMLDivElement>(null);
 
   // Update Jam
   useEffect(() => {
@@ -20,26 +21,35 @@ const TVMonitor: React.FC<TVMonitorProps> = ({ opds, progress, news }) => {
     return () => clearInterval(timer);
   }, []);
 
-  // Efek Auto-Scroll untuk Tabel
+  // Efek Auto-Scroll untuk Tabel Utama & Daftar Sukses
   useEffect(() => {
-    const scrollContainer = scrollRef.current;
-    if (!scrollContainer) return;
+    const tableContainer = tableScrollRef.current;
+    const successContainer = successScrollRef.current;
 
-    let scrollAmount = 0;
-    const scrollStep = 1;
-    const scrollInterval = 40;
+    const createScrollTask = (container: HTMLDivElement | null) => {
+      if (!container) return null;
+      let scrollAmount = 0;
+      const scrollStep = 1;
+      const scrollInterval = 40;
 
-    const scrollTask = setInterval(() => {
-      if (scrollContainer.scrollTop + scrollContainer.clientHeight >= scrollContainer.scrollHeight) {
-        scrollAmount = 0;
-        scrollContainer.scrollTop = 0;
-      } else {
-        scrollAmount += scrollStep;
-        scrollContainer.scrollTop = scrollAmount;
-      }
-    }, scrollInterval);
+      return setInterval(() => {
+        if (container.scrollTop + container.clientHeight >= container.scrollHeight) {
+          scrollAmount = 0;
+          container.scrollTop = 0;
+        } else {
+          scrollAmount += scrollStep;
+          container.scrollTop = scrollAmount;
+        }
+      }, scrollInterval);
+    };
 
-    return () => clearInterval(scrollTask);
+    const tableTask = createScrollTask(tableContainer);
+    const successTask = createScrollTask(successContainer);
+
+    return () => {
+      if (tableTask) clearInterval(tableTask);
+      if (successTask) clearInterval(successTask);
+    };
   }, [progress]);
 
   // Kalkulasi Data
@@ -52,23 +62,16 @@ const TVMonitor: React.FC<TVMonitorProps> = ({ opds, progress, news }) => {
   );
   const avgPercent = totalPaguMurni > 0 ? (totalPaguTerinput / totalPaguMurni) * 100 : 0;
   
-  const opd100 = progress.filter(p => {
-    const total = p.todayPenyediaPagu + p.todaySwakelolaPagu + p.todayPdSPagu;
-    return Math.round((total / (p.paguTarget || 1)) * 100) >= 100;
-  }).length;
-
-  // Top 5 OPD
-  const topOPDs = progress
+  // Filter OPD yang sudah 100%
+  const completedOPDs = progress
+    .filter(p => {
+      const total = p.todayPenyediaPagu + p.todaySwakelolaPagu + p.todayPdSPagu;
+      return Math.round((total / (p.paguTarget || 1)) * 100) >= 100;
+    })
     .map(p => {
       const opd = opds.find(o => o.id === p.opdId);
-      const total = p.todayPenyediaPagu + p.todaySwakelolaPagu + p.todayPdSPagu;
-      return { 
-        name: opd?.name || 'Unknown', 
-        percent: (total / (p.paguTarget || 1)) * 100 
-      };
-    })
-    .sort((a, b) => b.percent - a.percent)
-    .slice(0, 5);
+      return { name: opd?.name || 'Unknown' };
+    });
 
   return (
     <div className="h-screen w-full flex flex-col p-6 space-y-6 font-sans">
@@ -134,7 +137,7 @@ const TVMonitor: React.FC<TVMonitorProps> = ({ opds, progress, news }) => {
         />
         <MonitorCard 
           label="Satker Tuntas 100%" 
-          value={`${opd100} OPD`} 
+          value={`${completedOPDs.length} OPD`} 
           sub="Target penyelesaian input RUP"
           icon={<Award size={32}/>}
           color="amber"
@@ -144,35 +147,41 @@ const TVMonitor: React.FC<TVMonitorProps> = ({ opds, progress, news }) => {
       {/* MAIN DATA SECTION (SPLIT) */}
       <div className="flex-1 min-h-0 flex gap-6 overflow-hidden">
         
-        {/* LEFT: LEADERBOARD */}
-        <div className="w-1/3 flex flex-col space-y-4">
-          <div className="bg-slate-900/50 border border-white/5 p-6 rounded-[2.5rem] flex-1">
-            <h3 className="text-xl font-black uppercase tracking-widest text-slate-400 mb-8 flex items-center gap-3">
-              <Award className="text-amber-500" /> TOP 5 PROGRES TERTINGGI
+        {/* LEFT: LIST OPD TUNTAS 100% */}
+        <div className="w-1/3 flex flex-col space-y-4 overflow-hidden">
+          <div className="bg-slate-900/50 border border-white/5 p-6 rounded-[2.5rem] flex-1 flex flex-col overflow-hidden">
+            <h3 className="text-xl font-black uppercase tracking-widest text-slate-400 mb-6 flex items-center gap-3 shrink-0">
+              <CheckCircle2 className="text-emerald-500" /> OPD INPUT 100%
             </h3>
-            <div className="space-y-8">
-              {topOPDs.map((item, idx) => (
-                <div key={idx} className="space-y-3">
-                  <div className="flex justify-between items-end">
-                    <span className="text-sm font-black text-slate-300 uppercase truncate max-w-[250px]">{item.name}</span>
-                    <span className="text-2xl font-black text-white tabular-nums">{Math.round(item.percent)}%</span>
-                  </div>
-                  <div className="h-3 bg-white/5 rounded-full overflow-hidden border border-white/5 p-0.5">
-                    <div 
-                      className={`h-full rounded-full transition-all duration-1000 ${
-                        item.percent >= 100 ? 'bg-emerald-500' : 'bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]'
-                      }`}
-                      style={{ width: `${Math.min(item.percent, 100)}%` }}
-                    ></div>
-                  </div>
+            
+            <div 
+              ref={successScrollRef}
+              className="flex-1 overflow-y-auto custom-scrollbar space-y-3 pr-2 scroll-smooth"
+            >
+              {completedOPDs.length > 0 ? completedOPDs.map((item, idx) => (
+                <div key={idx} className="bg-emerald-500/5 border border-emerald-500/10 p-4 rounded-2xl flex items-start gap-3 group hover:bg-emerald-500/10 transition-colors">
+                  <Award className="text-emerald-500 shrink-0 mt-0.5" size={18} />
+                  <span className="text-xs font-black text-slate-200 uppercase leading-relaxed tracking-tight">
+                    {item.name}
+                  </span>
                 </div>
-              ))}
+              )) : (
+                <div className="h-full flex flex-col items-center justify-center text-center p-8 border-2 border-dashed border-white/5 rounded-3xl text-slate-600">
+                   <p className="font-bold uppercase tracking-widest text-xs">Belum ada OPD yang mencapai 100%</p>
+                </div>
+              )}
+            </div>
+            {/* Legend info */}
+            <div className="mt-6 pt-4 border-t border-white/5 text-[10px] font-black text-emerald-500/60 uppercase tracking-widest flex items-center gap-2 shrink-0">
+               <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+               Pencapaian Target Realisasi
             </div>
           </div>
+          
           <div className="bg-gradient-to-br from-red-600/20 to-transparent border border-red-500/20 p-6 rounded-[2.5rem] shrink-0">
              <h4 className="font-black text-red-500 uppercase tracking-widest text-xs mb-2">Peringatan Sistem</h4>
              <p className="text-slate-300 text-sm leading-relaxed italic">
-               Ditemukan <strong>{progress.filter(p => (p.todayPenyediaPagu + p.todaySwakelolaPagu + p.todayPdSPagu) / (p.paguTarget || 1) < 0.5).length} OPD</strong> dengan progres di bawah 50%. Diperlukan atensi pimpinan untuk percepatan input RUP sebelum batas waktu penganggaran.
+               Ditemukan <strong>{progress.filter(p => (p.todayPenyediaPagu + p.todaySwakelolaPagu + p.todayPdSPagu) / (p.paguTarget || 1) < 0.5).length} OPD</strong> dengan progres di bawah 50%. Diperlukan atensi pimpinan untuk percepatan input RUP.
              </p>
           </div>
         </div>
@@ -188,7 +197,7 @@ const TVMonitor: React.FC<TVMonitorProps> = ({ opds, progress, news }) => {
               </div>
            </div>
            <div 
-             ref={scrollRef}
+             ref={tableScrollRef}
              className="flex-1 overflow-y-auto pt-16 px-8 custom-scrollbar scroll-smooth"
            >
               <div className="divide-y divide-white/5">
