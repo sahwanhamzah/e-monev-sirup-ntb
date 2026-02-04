@@ -14,47 +14,52 @@
         @media print {
             @page { 
                 size: A4 landscape; 
-                margin: 0.5cm;
+                margin: 0.8cm;
             }
             
             /* RESET TOTAL UNTUK SEMUA ELEMEN INDUK */
-            html, body, #root, #root > div, main, div[class*="flex"], .print-container, .max-w-7xl {
+            html, body, #root, #root > div {
                 height: auto !important;
-                min-height: auto !important;
-                max-height: none !important;
                 overflow: visible !important;
-                display: block !important; /* Ubah flexbox menjadi block agar tidak terpotong */
+                display: block !important;
                 width: 100% !important;
-                float: none !important;
-                position: relative !important;
                 margin: 0 !important;
                 padding: 0 !important;
-                box-shadow: none !important;
-                transform: none !important;
+                background: white !important;
             }
 
-            /* Sembunyikan elemen UI aplikasi */
-            .no-print, nav, aside, header, footer, button, .toast-container, .bg-slate-50\/50, .fixed, .sticky { 
+            /* Pastikan Main Content Tetap Muncul */
+            main, .print-container, .max-w-7xl, .print-only {
+                display: block !important;
+                height: auto !important;
+                overflow: visible !important;
+                visibility: visible !important;
+                position: static !important;
+                width: 100% !important;
+            }
+
+            /* Sembunyikan elemen UI aplikasi saja */
+            .no-print, nav, aside, header, footer, button, .toast-container, .fixed, .sticky { 
                 display: none !important; 
-                position: absolute !important; /* Mencegah elemen tetap mengambil ruang */
                 visibility: hidden !important;
+                height: 0 !important;
+                width: 0 !important;
             }
 
-            /* Paksa area konten cetak tampil */
+            /* Tampilkan area laporan */
             .print-only { 
                 display: block !important; 
-                visibility: visible !important;
-                width: 100% !important;
             }
 
-            /* Optimasi Tabel Multi-Halaman */
+            /* Optimasi Tabel */
             table { 
+                display: table !important;
                 width: 100% !important;
                 border-collapse: collapse !important; 
-                table-layout: auto !important;
                 page-break-inside: auto !important;
                 border: 1pt solid black !important;
-                margin-top: 10px !important;
+                color: black !important;
+                background: white !important;
             }
             
             thead { display: table-header-group !important; }
@@ -67,14 +72,13 @@
             
             th, td { 
                 border: 0.5pt solid black !important; 
-                padding: 4px !important;
+                padding: 3px !important;
                 font-size: 8pt !important;
-                color: black !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
 
-            /* Paksa Warna Background Muncul */
+            /* Force Warna Latar Laporan */
             .bg-\[\#FFC000\] { background-color: #FFC000 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
             .bg-\[\#00B0F0\] { background-color: #00B0F0 !important; color: white !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
             .bg-\[\#D9EAD3\] { background-color: #D9EAD3 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
@@ -89,11 +93,8 @@
                 flex-direction: row !important;
                 justify-content: space-between !important;
                 align-items: flex-start !important;
-                border: none !important;
                 width: 100% !important;
             }
-            
-            h1 { font-size: 14pt !important; line-height: 1.2 !important; }
         }
 
         .print-only { display: none; }
