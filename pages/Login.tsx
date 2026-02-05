@@ -580,9 +580,9 @@ const Login: React.FC<LoginProps> = ({ onLogin, error, opds, progress, news }) =
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-5xl mx-auto">
                 <div className="space-y-10">
-                  <ContactItem icon={<MapPin size={28} />} title="Kantor Pusat" text="Kantor Gubernur NTB, Biro Pengadaan Barang dan Jasa, Jl. Pejanggik No. 12, Mataram" color="blue" />
+                  <ContactItem icon={<MapPin size={28} />} title="Alamat Kantor" text="Kantor Gubernur NTB, Biro Pengadaan Barang dan Jasa, Jl. Pejanggik No. 12, Mataram" color="blue" />
                   <ContactItem icon={<Phone size={28} />} title="Hotline Monitoring" text="(0370) 625274 • Senin - Jumat: 08:00 - 16:00 WITA" color="emerald" />
-                  <ContactItem icon={<Mail size={28} />} title="Surel Elektronik" text="biropbj@ntbprov.go.id • helpdesk.lpsentb@gmail.com" color="rose" />
+                  <ContactItem icon={<Mail size={28} />} title="Email" text="biropbj@ntbprov.go.id • helpdesk.lpsentb@gmail.com" color="rose" />
                 </div>
                 <div className="bg-slate-900 text-white p-12 rounded-[3.5rem] shadow-2xl space-y-8 relative overflow-hidden">
                   <div className="absolute top-0 right-0 p-8 opacity-5"><ShieldCheck size={120} /></div>
@@ -655,11 +655,11 @@ const Login: React.FC<LoginProps> = ({ onLogin, error, opds, progress, news }) =
             </div>
 
             <div className="max-w-7xl mx-auto mt-16 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] font-black uppercase tracking-[0.2em]">
-              <p>© 2026 Pemerintah Provinsi Nusa Tenggara Barat. Hak Cipta Dilindungi.</p>
+              <p>© 2026 Biro PBJ NTB. Hak Cipta Dilindungi.</p>
               <div className="flex items-center gap-4">
-                <span>Biro Pengadaan Barang dan Jasa</span>
+                <span>LPSE Provinsi NTB</span>
                 <span className="w-1.5 h-1.5 bg-slate-700 rounded-full"></span>
-                <span>NTB Gemilang</span>
+                <span>NTB Makmur Mendunia</span>
               </div>
             </div>
           </footer>
