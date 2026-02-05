@@ -22,7 +22,12 @@ import {
   Monitor, 
   Award, 
   ArrowUpRight, 
-  ShieldCheck 
+  ShieldCheck,
+  FileText,
+  Facebook,
+  Twitter,
+  Instagram,
+  Youtube
 } from 'lucide-react';
 import { OPD, ProgressData, NewsItem } from '../types';
 import { formatReportNumber, formatReportDecimal, getStatusBgClass, getCurrentTimestamp, formatCurrencyMillions, formatPercent } from '../utils';
@@ -62,7 +67,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, error, opds, progress, news }) =
 
   // Efek Auto-Scroll untuk Mode TV (Tabel Utama & Daftar Sukses)
   useEffect(() => {
-    if (activeView !== 'tv') return;
+    if ((activeView as string) !== 'tv') return;
     
     const tableContainer = scrollRef.current;
     const successContainer = successScrollRef.current;
@@ -162,16 +167,16 @@ const Login: React.FC<LoginProps> = ({ onLogin, error, opds, progress, news }) =
   };
 
   return (
-    <div className={`min-h-screen font-sans flex flex-col relative overflow-hidden transition-colors duration-500 ${activeView === 'login' || activeView === 'tv' ? 'bg-slate-950' : 'bg-slate-50'}`}>
+    <div className={`min-h-screen font-sans flex flex-col relative overflow-hidden transition-colors duration-500 ${(activeView as string) === 'login' || (activeView as string) === 'tv' ? 'bg-slate-950' : 'bg-slate-50'}`}>
       
       {/* Background Image: Hidden in TV Mode */}
-      {activeView !== 'tv' && (
+      {(activeView as string) !== 'tv' && (
         <>
           <div 
             className="absolute inset-0 z-0 bg-cover bg-center animate-in fade-in duration-1000"
             style={{ 
               backgroundImage: 'url("https://storage.ntbprov.go.id/biropbj/media/kantor-gub.jpg")',
-              filter: activeView === 'login' ? 'brightness(0.3) saturate(0.5)' : 'brightness(1) opacity(0.03)'
+              filter: (activeView as string) === 'login' ? 'brightness(0.3) saturate(0.5)' : 'brightness(1) opacity(0.03)'
             }}
           />
           <div className="absolute inset-0 z-[1] opacity-5 pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
@@ -181,8 +186,8 @@ const Login: React.FC<LoginProps> = ({ onLogin, error, opds, progress, news }) =
       {/* Content Wrapper */}
       <div className="relative z-10 min-h-screen flex flex-col">
         {/* Navbar Atas */}
-        {activeView !== 'tv' && (
-          <nav className={`h-[60px] flex items-center justify-between px-6 shrink-0 shadow-xl border-b sticky top-0 z-50 transition-all ${activeView === 'login' ? 'bg-black/40 backdrop-blur-xl text-white border-white/10' : 'bg-slate-900 text-white border-slate-800'}`}>
+        {(activeView as string) !== 'tv' && (
+          <nav className={`h-[60px] flex items-center justify-between px-6 shrink-0 shadow-xl border-b sticky top-0 z-50 transition-all ${(activeView as string) === 'login' ? 'bg-black/40 backdrop-blur-xl text-white border-white/10' : 'bg-slate-900 text-white border-slate-800'}`}>
             <div className="flex items-center h-full">
               <div className="bg-[#d9534f] h-full px-6 flex items-center skew-x-[-20deg] -ml-6 mr-8 cursor-pointer group hover:bg-red-700 transition-colors" onClick={() => setActiveView('login')}>
                 <div className="skew-x-[20deg] flex items-center gap-2">
@@ -198,9 +203,9 @@ const Login: React.FC<LoginProps> = ({ onLogin, error, opds, progress, news }) =
                   Rekap Progres
                   {activeView === 'rekap' && <span className="absolute bottom-[-14px] left-0 right-0 h-1 bg-[#d9534f] rounded-full"></span>}
                 </button>
-                <button onClick={() => setActiveView('tv')} className={`hover:text-white transition-all py-2 px-1 flex items-center gap-2 relative ${activeView === 'tv' ? 'text-white' : ''}`}>
+                <button onClick={() => setActiveView('tv')} className={`hover:text-white transition-all py-2 px-1 flex items-center gap-2 relative ${(activeView as string) === 'tv' ? 'text-white' : ''}`}>
                   <Monitor size={16} className="text-[#d9534f]" /> TV Monitor
-                  {activeView === 'tv' && <span className="absolute bottom-[-14px] left-0 right-0 h-1 bg-[#d9534f] rounded-full"></span>}
+                  {(activeView as string) === 'tv' && <span className="absolute bottom-[-14px] left-0 right-0 h-1 bg-[#d9534f] rounded-full"></span>}
                 </button>
                 <a 
                   href="https://sirup.inaproc.id/sirup/rekap/klpd/D301" 
@@ -239,7 +244,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, error, opds, progress, news }) =
         )}
 
         {/* Main Content Area */}
-        <div className={`flex-1 flex flex-col items-center ${activeView === 'login' ? 'justify-center' : 'justify-start pt-12'} px-4 overflow-y-auto custom-scrollbar pb-12`}>
+        <div className={`flex-1 flex flex-col items-center ${activeView === 'login' ? 'justify-center' : 'justify-start pt-12'} px-4 overflow-y-auto custom-scrollbar`}>
           
           {/* VIEW: TV MONITOR */}
           {activeView === 'tv' && (
@@ -405,7 +410,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, error, opds, progress, news }) =
 
           {/* VIEW: LOGIN */}
           {activeView === 'login' && (
-            <div className="w-full flex flex-col items-center animate-in zoom-in-95 duration-500">
+            <div className="w-full flex flex-col items-center animate-in zoom-in-95 duration-500 pb-20">
               <div className="w-full max-w-[420px] bg-black/40 backdrop-blur-xl rounded-[2rem] shadow-2xl p-10 flex flex-col items-center border border-white/10 relative overflow-hidden">
                 <button onClick={() => setActiveView('rekap')} className="absolute top-4 right-4 p-2 text-white/40 hover:text-white transition-colors">
                   <X size={20} />
@@ -575,9 +580,9 @@ const Login: React.FC<LoginProps> = ({ onLogin, error, opds, progress, news }) =
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-5xl mx-auto">
                 <div className="space-y-10">
-                  <ContactItem icon={<MapPin size={28} />} title="Alamat Kantor" text="Kantor Gubernur NTB, Biro Pengadaan Barang dan Jasa, Jl. Pejanggik No. 12, Mataram" color="blue" />
+                  <ContactItem icon={<MapPin size={28} />} title="Kantor Pusat" text="Kantor Gubernur NTB, Biro Pengadaan Barang dan Jasa, Jl. Pejanggik No. 12, Mataram" color="blue" />
                   <ContactItem icon={<Phone size={28} />} title="Hotline Monitoring" text="(0370) 625274 • Senin - Jumat: 08:00 - 16:00 WITA" color="emerald" />
-                  <ContactItem icon={<Mail size={28} />} title="Email" text="biropbj@ntbprov.go.id • hhelpdesk.lpsentb@gmail.com" color="rose" />
+                  <ContactItem icon={<Mail size={28} />} title="Surel Elektronik" text="biropbj@ntbprov.go.id • helpdesk.lpsentb@gmail.com" color="rose" />
                 </div>
                 <div className="bg-slate-900 text-white p-12 rounded-[3.5rem] shadow-2xl space-y-8 relative overflow-hidden">
                   <div className="absolute top-0 right-0 p-8 opacity-5"><ShieldCheck size={120} /></div>
@@ -592,6 +597,73 @@ const Login: React.FC<LoginProps> = ({ onLogin, error, opds, progress, news }) =
             </div>
           )}
         </div>
+
+        {/* FOOTER: Hanya tampil di view publik, tidak di TV mode */}
+        {activeView !== 'tv' && (
+          <footer className={`shrink-0 w-full pt-16 pb-8 px-6 border-t transition-all ${activeView === 'login' ? 'bg-slate-950/80 border-white/10 text-slate-400' : 'bg-slate-900 border-slate-800 text-slate-400'}`}>
+            <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12">
+              <div className="col-span-1 md:col-span-1 space-y-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-[#d9534f] rounded-xl flex items-center justify-center shadow-lg shadow-red-900/20">
+                    <FileText className="text-white" size={20} />
+                  </div>
+                  <span className="text-2xl font-black tracking-tighter text-white">SiRUP NTB</span>
+                </div>
+                <p className="text-sm leading-relaxed font-medium">
+                  Sistem Informasi Monitoring Progres Rencana Umum Pengadaan (SiRUP) Pemerintah Provinsi Nusa Tenggara Barat.
+                </p>
+                <div className="flex items-center gap-4">
+                  <SocialIcon icon={<Facebook size={18}/>} />
+                  <SocialIcon icon={<Twitter size={18}/>} />
+                  <SocialIcon icon={<Instagram size={18}/>} />
+                  <SocialIcon icon={<Youtube size={18}/>} />
+                </div>
+              </div>
+
+              <div className="space-y-6">
+                <h4 className="text-white font-black uppercase tracking-widest text-xs">Menu Cepat</h4>
+                <ul className="space-y-3 text-sm font-bold">
+                  <li><button onClick={() => setActiveView('rekap')} className="hover:text-white transition-colors">Rekap Data</button></li>
+                  <li><button onClick={() => setActiveView('berita')} className="hover:text-white transition-colors">Pengumuman</button></li>
+                  <li><button onClick={() => setActiveView('kontak')} className="hover:text-white transition-colors">Layanan Bantuan</button></li>
+                  <li><button onClick={() => setActiveView('tv')} className="hover:text-white transition-colors flex items-center gap-2">Monitor Publik <Monitor size={14}/></button></li>
+                </ul>
+              </div>
+
+              <div className="space-y-6">
+                <h4 className="text-white font-black uppercase tracking-widest text-xs">Tautan Eksternal</h4>
+                <ul className="space-y-3 text-sm font-bold">
+                  <li><a href="https://sirup.lkpp.go.id" target="_blank" rel="noreferrer" className="hover:text-white transition-colors flex items-center gap-1.5">SiRUP Nasional <ExternalLink size={12}/></a></li>
+                  <li><a href="https://lpse.ntbprov.go.id" target="_blank" rel="noreferrer" className="hover:text-white transition-colors flex items-center gap-1.5">LPSE Prov. NTB <ExternalLink size={12}/></a></li>
+                  <li><a href="https://ntbprov.go.id" target="_blank" rel="noreferrer" className="hover:text-white transition-colors flex items-center gap-1.5">Pemprov NTB <ExternalLink size={12}/></a></li>
+                </ul>
+              </div>
+
+              <div className="space-y-6">
+                <h4 className="text-white font-black uppercase tracking-widest text-xs">Lokasi Kantor</h4>
+                <div className="space-y-4 text-sm font-medium">
+                  <div className="flex gap-3">
+                    <MapPin size={18} className="text-[#d9534f] shrink-0" />
+                    <span>Biro Pengadaan Barang dan Jasa Sekretariat Daerah Provinsi NTB, Jl. Pejanggik No. 12, Mataram</span>
+                  </div>
+                  <div className="flex gap-3">
+                    <Phone size={18} className="text-[#d9534f] shrink-0" />
+                    <span>(0370) 6211234</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="max-w-7xl mx-auto mt-16 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] font-black uppercase tracking-[0.2em]">
+              <p>© 2026 Pemerintah Provinsi Nusa Tenggara Barat. Hak Cipta Dilindungi.</p>
+              <div className="flex items-center gap-4">
+                <span>Biro Pengadaan Barang dan Jasa</span>
+                <span className="w-1.5 h-1.5 bg-slate-700 rounded-full"></span>
+                <span>NTB Gemilang</span>
+              </div>
+            </div>
+          </footer>
+        )}
       </div>
 
       {/* MODAL DETAIL BERITA */}
@@ -655,5 +727,11 @@ const ContactItem: React.FC<{ icon: React.ReactNode, title: string, text: string
     </div>
   );
 };
+
+const SocialIcon: React.FC<{ icon: React.ReactNode }> = ({ icon }) => (
+  <button className="w-9 h-9 bg-white/5 hover:bg-[#d9534f] hover:text-white rounded-lg flex items-center justify-center transition-all duration-300">
+    {icon}
+  </button>
+);
 
 export default Login;
