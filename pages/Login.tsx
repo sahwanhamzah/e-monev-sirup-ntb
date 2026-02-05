@@ -633,9 +633,9 @@ const Login: React.FC<LoginProps> = ({ onLogin, error, opds, progress, news }) =
               <div className="space-y-6">
                 <h4 className="text-white font-black uppercase tracking-widest text-xs">Tautan Eksternal</h4>
                 <ul className="space-y-3 text-sm font-bold">
-                  <li><a href="https://sirup.lkpp.go.id" target="_blank" rel="noreferrer" className="hover:text-white transition-colors flex items-center gap-1.5">SiRUP Nasional <ExternalLink size={12}/></a></li>
-                  <li><a href="https://lpse.ntbprov.go.id" target="_blank" rel="noreferrer" className="hover:text-white transition-colors flex items-center gap-1.5">LPSE Prov. NTB <ExternalLink size={12}/></a></li>
-                  <li><a href="https://ntbprov.go.id" target="_blank" rel="noreferrer" className="hover:text-white transition-colors flex items-center gap-1.5">Pemprov NTB <ExternalLink size={12}/></a></li>
+                  <li><a href="https://sirup.inaproc.id/sirup/home/rekapitulasiindex" target="_blank" rel="noreferrer" className="hover:text-white transition-colors flex items-center gap-1.5">SiRUP Nasional <ExternalLink size={12}/></a></li>
+                  <li><a href="https://spse.inaproc.id/ntbprov" target="_blank" rel="noreferrer" className="hover:text-white transition-colors flex items-center gap-1.5">LPSE Prov. NTB <ExternalLink size={12}/></a></li>
+                  <li><a href="https://biropbj.ntbprov.go.id" target="_blank" rel="noreferrer" className="hover:text-white transition-colors flex items-center gap-1.5">Biro PBJ NTB <ExternalLink size={12}/></a></li>
                 </ul>
               </div>
 
