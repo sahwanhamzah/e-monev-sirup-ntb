@@ -261,6 +261,12 @@ const OfficialReport: React.FC<OfficialReportProps> = ({ opds, progress, setting
             </div>
           </div>
 
+          <div className="space-y-1 text-[8.5px] font-bold">
+                <p>* Data pagu ditampilkan dalam satuan jutaan rupiah;</p>
+                <p>* Pagu Pengadaan (selain dari kode akun : 5.1.01 , 5.1.03 , 5.1.04 dan 5.4 dan tagging NP) otomatis terisi apabila sudah melakukan penarikan data RKAD dari aplikasi SIPD.</p>
+              </div>
+            </div>
+
           <div className="text-center w-64 md:w-80">
             <p className="mb-20 uppercase leading-relaxed font-bold">
               Mataram, {new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}<br />
