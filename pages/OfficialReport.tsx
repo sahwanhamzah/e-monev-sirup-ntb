@@ -25,7 +25,7 @@ const OfficialReport: React.FC<OfficialReportProps> = ({ opds, progress, setting
     });
   }, [progress, opds, searchTerm]);
 
-  // Pagination Logic (Hanya untuk tampilan layar agar tidak berat)
+  // Pagination Logic
   const totalEntries = filteredData.length;
   const totalPages = Math.ceil(totalEntries / pageSize);
   const paginatedData = useMemo(() => {
@@ -37,6 +37,7 @@ const OfficialReport: React.FC<OfficialReportProps> = ({ opds, progress, setting
   const endEntry = Math.min(currentPage * pageSize, totalEntries);
 
   const calculateTotals = () => {
+    // Gunakan filteredData agar total menyesuaikan hasil pencarian jika ada
     return filteredData.reduce((acc, curr) => {
       acc.paguTarget += (curr.paguTarget || 0);
       acc.todayPenPaket += (curr.todayPenyediaPaket || 0);
@@ -45,12 +46,14 @@ const OfficialReport: React.FC<OfficialReportProps> = ({ opds, progress, setting
       acc.todaySwPagu += (curr.todaySwakelolaPagu || 0);
       acc.todayPdSPaket += (curr.todayPdSPaket || 0);
       acc.todayPdSPagu += (curr.todayPdSPagu || 0);
+      acc.totalPrevPct += (curr.prevPercent || 0); // Hanya untuk rata-rata jika dibutuhkan
       return acc;
     }, {
       paguTarget: 0,
       todayPenPaket: 0, todayPenPagu: 0,
       todaySwPaket: 0, todaySwPagu: 0,
       todayPdSPaket: 0, todayPdSPagu: 0,
+      totalPrevPct: 0
     });
   };
 
@@ -58,6 +61,9 @@ const OfficialReport: React.FC<OfficialReportProps> = ({ opds, progress, setting
   const totalBarisPaket = totals.todayPenPaket + totals.todaySwPaket + totals.todayPdSPaket;
   const totalBarisPagu = totals.todayPenPagu + totals.todaySwPagu + totals.todayPdSPagu;
   const totalPctToday = totals.paguTarget > 0 ? (totalBarisPagu / totals.paguTarget) * 100 : 0;
+  
+  // Hitung rata-rata persentase sebelumnya
+  const avgPrevPct = filteredData.length > 0 ? totals.totalPrevPct / filteredData.length : 0;
 
   const getPageNumbers = () => {
     const pages = [];
@@ -69,7 +75,6 @@ const OfficialReport: React.FC<OfficialReportProps> = ({ opds, progress, setting
     return pages;
   };
 
-  // Komponen Tabel Inti yang digunakan baik di layar maupun cetak
   const ReportTableContent = ({ data, startIdx }: { data: ProgressData[], startIdx: number }) => (
     <table className="w-full text-[8.5px] md:text-[9.5px] border-collapse border border-black leading-tight bg-white">
       <thead>
@@ -140,7 +145,9 @@ const OfficialReport: React.FC<OfficialReportProps> = ({ opds, progress, setting
           <td className="border border-black p-1">{formatReportNumber(totals.todayPdSPagu)}</td>
           <td className="border border-black p-1">{formatReportNumber(totalBarisPaket)}</td>
           <td className="border border-black p-1">{formatReportNumber(totalBarisPagu)}</td>
-          <td className="border border-black p-1 text-center">0,00</td>
+          <td className={`border border-black p-1 text-center ${getStatusBgClass(avgPrevPct)}`}>
+            {formatReportDecimal(avgPrevPct)}
+          </td>
           <td className={`border border-black p-1 text-center ${getStatusBgClass(totalPctToday)}`}>
             {formatReportDecimal(totalPctToday)}
           </td>
@@ -165,7 +172,6 @@ const OfficialReport: React.FC<OfficialReportProps> = ({ opds, progress, setting
       </div>
 
       <div className="bg-white p-4 md:p-8 shadow-sm border border-slate-200 rounded-lg print-container">
-        {/* Main Header */}
         <div className="text-center mb-8">
           <h1 className="text-sm md:text-lg font-black uppercase tracking-tight leading-tight">
             PROGRES RENCANA UMUM PENGADAAN (RUP) APBD PEMPROV NTB TA. {settings.ta}
@@ -175,7 +181,6 @@ const OfficialReport: React.FC<OfficialReportProps> = ({ opds, progress, setting
           </div>
         </div>
 
-        {/* Tampilan Layar: Dengan Pagination & Search (disembunyikan saat cetak) */}
         <div className="no-print">
           <div className="mb-6 flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="flex items-center gap-2 text-sm font-medium text-slate-700">
@@ -217,22 +222,18 @@ const OfficialReport: React.FC<OfficialReportProps> = ({ opds, progress, setting
             </div>
             <div className="flex items-center -space-x-px">
               <button onClick={() => setCurrentPage(1)} disabled={currentPage === 1} className="px-4 py-2 text-sm font-medium bg-white border border-slate-300 rounded-l-lg disabled:opacity-50">Pertama</button>
-              <button onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))} disabled={currentPage === 1} className="px-4 py-2 text-sm font-medium bg-white border border-slate-300 disabled:opacity-50">Sebelumnya</button>
               {getPageNumbers().map(num => (
                 <button key={num} onClick={() => setCurrentPage(num)} className={`px-4 py-2 text-sm font-bold border transition-all ${currentPage === num ? 'bg-[#d9534f] border-[#d9534f] text-white z-10' : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-50'}`}>{num}</button>
               ))}
-              <button onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))} disabled={currentPage === totalPages || totalPages === 0} className="px-4 py-2 text-sm font-medium bg-white border border-slate-300 disabled:opacity-50">Selanjutnya</button>
               <button onClick={() => setCurrentPage(totalPages)} disabled={currentPage === totalPages || totalPages === 0} className="px-4 py-2 text-sm font-medium bg-white border border-slate-300 rounded-r-lg disabled:opacity-50">Terakhir</button>
             </div>
           </div>
         </div>
 
-        {/* Tampilan Cetak: Tampilkan Seluruh Data tanpa batasan halaman */}
         <div className="print-only">
            <ReportTableContent data={filteredData} startIdx={0} />
         </div>
 
-        {/* Footer Laporan / Tanda Tangan */}
         <div className="mt-8 signature-block text-[8px] md:text-[9.5px]">
           <div className="space-y-1">
             <p className="font-bold underline uppercase tracking-widest text-[9px] mb-2">Sumber Data :</p>
@@ -240,25 +241,6 @@ const OfficialReport: React.FC<OfficialReportProps> = ({ opds, progress, setting
               <li>SiRUP LKPP RI</li>
               <li>BPKAD Prov. NTB (SIPD-RI)</li>
             </ul>
-            <div className="mt-6 space-y-1.5">
-              <p className="font-bold underline uppercase tracking-widest text-[9px] mb-1">Keterangan Warna :</p>
-              <div className="flex items-center gap-2">
-                <div className="w-5 h-3 bg-[#FF0000] border border-black"></div> 
-                <span className="font-medium">0% - 50% (Atensi)</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-5 h-3 bg-[#FFFF00] border border-black"></div> 
-                <span className="font-medium">51% - 99% (Sedang)</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-5 h-3 bg-[#00B050] border border-black"></div> 
-                <span className="font-medium">100% (Sesuai)</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-5 h-3 bg-[#00B0F0] border border-black"></div> 
-                <span className="font-medium">&gt;100% (Kelebihan)</span>
-              </div>
-            </div>
           </div>
 
           <div className="text-center w-64 md:w-80">
