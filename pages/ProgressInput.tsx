@@ -1,8 +1,8 @@
 
 import React, { useState, useRef } from 'react';
-import { Search, Info, CheckCircle2, Upload, Download, X, AlertTriangle, FileSpreadsheet } from 'lucide-react';
+import { Search, Info, CheckCircle2, Upload, Download, X, AlertTriangle, FileSpreadsheet, Percent } from 'lucide-react';
 import { OPD, ProgressData } from '../types';
-import { formatReportNumber } from '../utils';
+import { formatReportNumber, formatReportDecimal, getStatusBgClass } from '../utils';
 
 interface ProgressInputProps {
   opds: OPD[];
@@ -31,6 +31,16 @@ const ProgressInput: React.FC<ProgressInputProps> = ({ opds, progress, onUpdate,
     };
     onUpdate(updatedData);
   };
+
+  // Kalkulasi Preview Real-time
+  const calculatePreview = () => {
+    if (!currentProgress) return { total: 0, pct: 0 };
+    const total = currentProgress.todayPenyediaPagu + currentProgress.todaySwakelolaPagu + currentProgress.todayPdSPagu;
+    const pct = currentProgress.paguTarget > 0 ? (total / currentProgress.paguTarget) * 100 : 0;
+    return { total, pct };
+  };
+
+  const preview = calculatePreview();
 
   // Fungsi Unduh Template CSV
   const downloadTemplate = () => {
@@ -62,12 +72,10 @@ const ProgressInput: React.FC<ProgressInputProps> = ({ opds, progress, onUpdate,
         const lines = text.split('\n');
         const newProgressData: ProgressData[] = [];
         
-        // Mulai dari baris ke-1 (skip header)
         for (let i = 1; i < lines.length; i++) {
           const line = lines[i].trim();
           if (!line) continue;
 
-          // Split CSV dengan koma, tapi abaikan koma di dalam tanda kutip (nama OPD)
           const parts = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
           if (parts && parts.length >= 8) {
             const opdId = parts[0].replace(/"/g, '');
@@ -92,7 +100,6 @@ const ProgressInput: React.FC<ProgressInputProps> = ({ opds, progress, onUpdate,
           onBulkUpdate(newProgressData);
           setIsImportModalOpen(false);
           setImportError(null);
-          alert(`Berhasil mengimpor data progres untuk ${newProgressData.length} OPD.`);
         } else {
           setImportError("Tidak ada data valid yang ditemukan dalam file.");
         }
@@ -117,14 +124,8 @@ const ProgressInput: React.FC<ProgressInputProps> = ({ opds, progress, onUpdate,
             className="flex items-center gap-2 bg-slate-900 text-white px-4 py-2.5 rounded-xl text-sm font-bold hover:bg-slate-800 transition-all shadow-lg shadow-slate-200"
           >
             <Upload size={18} />
-            Impor Massal (Excel/CSV)
+            Impor Massal (CSV)
           </button>
-          {selectedOpdId && (
-            <div className="hidden sm:flex items-center gap-2 bg-emerald-50 text-emerald-700 px-3 py-2 rounded-xl border border-emerald-100">
-              <CheckCircle2 size={16} />
-              <span className="text-xs font-bold uppercase tracking-wider">Auto-Sync</span>
-            </div>
-          )}
         </div>
       </div>
       
@@ -168,10 +169,14 @@ const ProgressInput: React.FC<ProgressInputProps> = ({ opds, progress, onUpdate,
                   <h3 className="font-bold text-xl text-slate-900 mb-2">
                     {opds.find(o => o.id === selectedOpdId)?.name}
                   </h3>
-                  <div className="flex items-center gap-4">
+                  <div className="flex flex-wrap gap-4">
                     <div className="flex items-center gap-1.5 bg-blue-50 text-blue-700 px-2.5 py-1 rounded-md text-xs font-bold">
-                      <span className="opacity-70 uppercase">Pagu Pengadaan:</span>
+                      <span className="opacity-70 uppercase tracking-tighter">Target Pagu:</span>
                       <span>Rp {formatReportNumber(currentProgress.paguTarget)} Jt</span>
+                    </div>
+                    <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold ${getStatusBgClass(preview.pct)}`}>
+                       <Percent size={12} />
+                       <span>Progres Sekarang: {formatReportDecimal(preview.pct)}%</span>
                     </div>
                   </div>
                 </div>
@@ -215,11 +220,15 @@ const ProgressInput: React.FC<ProgressInputProps> = ({ opds, progress, onUpdate,
                 </div>
               </div>
 
-              <div className="bg-slate-50 p-4 rounded-xl flex items-start gap-3 border border-slate-100">
-                <Info size={18} className="text-slate-400 mt-0.5" />
-                <p className="text-xs text-slate-500 leading-relaxed italic">
-                  Data yang diinput otomatis diakumulasikan ke dalam <strong>Total Terumumkan</strong> di Laporan Resmi. 
-                </p>
+              <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 space-y-4">
+                 <div className="flex items-center gap-3">
+                   <div className="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center text-slate-400">
+                     <Info size={20} />
+                   </div>
+                   <p className="text-xs text-slate-500 font-medium leading-relaxed italic">
+                    Data tersimpan otomatis. Persentase di atas dihitung dari <strong>Penyedia + Swakelola + PdS</strong> dibagi Target Pagu.
+                   </p>
+                 </div>
               </div>
             </div>
           ) : (
@@ -244,7 +253,7 @@ const ProgressInput: React.FC<ProgressInputProps> = ({ opds, progress, onUpdate,
                 </div>
                 <div>
                   <h3 className="font-bold text-lg">Impor Massal Progres</h3>
-                  <p className="text-xs text-slate-400">Update data via file CSV/Excel</p>
+                  <p className="text-xs text-slate-400">Update data via file CSV</p>
                 </div>
               </div>
               <button onClick={() => setIsImportModalOpen(false)} className="p-2 hover:bg-white/10 rounded-full transition-colors">
@@ -254,19 +263,17 @@ const ProgressInput: React.FC<ProgressInputProps> = ({ opds, progress, onUpdate,
             
             <div className="p-8 space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="p-4 border border-blue-100 bg-blue-50 rounded-xl space-y-3">
-                  <p className="text-xs font-bold text-blue-900 uppercase">Langkah 1: Download</p>
-                  <p className="text-[11px] text-blue-700 leading-relaxed">Gunakan template yang sudah berisi daftar OPD Anda agar tidak terjadi kesalahan ID.</p>
-                  <button onClick={downloadTemplate} className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white py-2 rounded-lg text-xs font-bold hover:bg-blue-700 transition-colors">
-                    <Download size={14} /> Download Template
+                <div className="p-4 border border-blue-100 bg-blue-50 rounded-xl space-y-3 text-center">
+                  <p className="text-xs font-black text-blue-900 uppercase tracking-widest">1. Download</p>
+                  <button onClick={downloadTemplate} className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white py-3 rounded-lg text-xs font-bold hover:bg-blue-700 transition-colors">
+                    <Download size={14} /> Template (.csv)
                   </button>
                 </div>
-                <div className="p-4 border border-slate-200 bg-slate-50 rounded-xl space-y-3">
-                  <p className="text-xs font-bold text-slate-900 uppercase">Langkah 2: Upload</p>
-                  <p className="text-[11px] text-slate-600 leading-relaxed">Pastikan file dalam format .CSV (Comma Separated Values) dan angka menggunakan titik (.)</p>
+                <div className="p-4 border border-slate-200 bg-slate-50 rounded-xl space-y-3 text-center">
+                  <p className="text-xs font-black text-slate-900 uppercase tracking-widest">2. Upload</p>
                   <input type="file" ref={fileInputRef} onChange={handleFileUpload} className="hidden" accept=".csv" />
-                  <button onClick={() => fileInputRef.current?.click()} className="w-full flex items-center justify-center gap-2 bg-slate-900 text-white py-2 rounded-lg text-xs font-bold hover:bg-slate-800 transition-colors">
-                    <Upload size={14} /> Pilih & Unggah File
+                  <button onClick={() => fileInputRef.current?.click()} className="w-full flex items-center justify-center gap-2 bg-slate-900 text-white py-3 rounded-lg text-xs font-bold hover:bg-slate-800 transition-colors">
+                    <Upload size={14} /> Pilih File
                   </button>
                 </div>
               </div>
@@ -277,24 +284,6 @@ const ProgressInput: React.FC<ProgressInputProps> = ({ opds, progress, onUpdate,
                   <p className="text-xs font-bold">{importError}</p>
                 </div>
               )}
-
-              <div className="bg-amber-50 p-4 rounded-xl border border-amber-100 space-y-2">
-                <h4 className="text-xs font-bold text-amber-900 uppercase flex items-center gap-2">
-                  <Info size={14} /> Catatan Penting
-                </h4>
-                <ul className="text-[10px] text-amber-800 space-y-1 list-disc pl-4">
-                  <li>Jangan mengubah kolom <strong>ID OPD</strong> karena itu kunci sinkronisasi data.</li>
-                  <li>Isi kolom Paket dengan angka bulat (Integer).</li>
-                  <li>Isi kolom Pagu dengan angka desimal (Gunakan titik sebagai pemisah, bukan koma).</li>
-                  <li>Gunakan aplikasi Excel atau Google Sheets untuk mengedit file template.</li>
-                </ul>
-              </div>
-            </div>
-            
-            <div className="p-4 bg-slate-50 border-t flex justify-end">
-              <button onClick={() => setIsImportModalOpen(false)} className="px-6 py-2 text-sm font-bold text-slate-500 hover:text-slate-700 transition-colors">
-                Tutup
-              </button>
             </div>
           </div>
         </div>
@@ -315,7 +304,7 @@ const InputGroup: React.FC<{ label: string, value: number, onChange: (val: strin
       <input 
         type="number" 
         step="0.01"
-        className={`w-full p-2.5 text-sm font-bold border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all ${isCurrency ? 'pl-8' : ''}`}
+        className={`w-full p-2.5 text-sm font-bold border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all ${isCurrency ? 'pl-8' : ''}`}
         value={value === 0 ? '' : value} 
         placeholder="0"
         onChange={e => onChange(e.target.value)} 
