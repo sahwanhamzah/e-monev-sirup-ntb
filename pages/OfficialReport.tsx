@@ -271,14 +271,13 @@ const OfficialReport: React.FC<OfficialReportProps> = ({ opds, progress, setting
               </div>
             </div>
 
-            <div className="text-center w-64 md:w-80 shrink-0 self-start">
-              <p className="mb-20 uppercase leading-relaxed font-bold text-[9.5px]">
-                Mataram, {new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }).toUpperCase()}<br />
-                {settings.pejabatJabatan},
-              </p>
-              <p className="font-black underline uppercase tracking-tight text-[11px] mb-1">{settings.pejabatNama}</p>
-              <p className="font-bold text-[10px]">NIP. {settings.pejabatNip}</p>
-            </div>
+            <div className="text-center w-64 md:w-80">
+            <p className="mb-20 uppercase leading-relaxed font-bold">
+              Mataram, {new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}<br />
+              {settings.pejabatJabatan},
+            </p>
+            <p className="font-black underline uppercase tracking-tight text-[11px] mb-1">{settings.pejabatNama}</p>
+            <p className="font-bold text-[10px]">NIP. {settings.pejabatNip}</p>
           </div>
         </div>
       </div>
@@ -287,3 +286,4 @@ const OfficialReport: React.FC<OfficialReportProps> = ({ opds, progress, setting
 };
 
 export default OfficialReport;
+
