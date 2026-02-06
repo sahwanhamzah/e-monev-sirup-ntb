@@ -37,7 +37,6 @@ const OfficialReport: React.FC<OfficialReportProps> = ({ opds, progress, setting
   const endEntry = Math.min(currentPage * pageSize, totalEntries);
 
   const calculateTotals = () => {
-    // Gunakan filteredData agar total menyesuaikan hasil pencarian jika ada
     return filteredData.reduce((acc, curr) => {
       acc.paguTarget += (curr.paguTarget || 0);
       acc.todayPenPaket += (curr.todayPenyediaPaket || 0);
@@ -46,7 +45,7 @@ const OfficialReport: React.FC<OfficialReportProps> = ({ opds, progress, setting
       acc.todaySwPagu += (curr.todaySwakelolaPagu || 0);
       acc.todayPdSPaket += (curr.todayPdSPaket || 0);
       acc.todayPdSPagu += (curr.todayPdSPagu || 0);
-      acc.totalPrevPct += (curr.prevPercent || 0); // Hanya untuk rata-rata jika dibutuhkan
+      acc.totalPrevPct += (curr.prevPercent || 0);
       return acc;
     }, {
       paguTarget: 0,
@@ -62,7 +61,6 @@ const OfficialReport: React.FC<OfficialReportProps> = ({ opds, progress, setting
   const totalBarisPagu = totals.todayPenPagu + totals.todaySwPagu + totals.todayPdSPagu;
   const totalPctToday = totals.paguTarget > 0 ? (totalBarisPagu / totals.paguTarget) * 100 : 0;
   
-  // Hitung rata-rata persentase sebelumnya
   const avgPrevPct = filteredData.length > 0 ? totals.totalPrevPct / filteredData.length : 0;
 
   const getPageNumbers = () => {
@@ -106,8 +104,8 @@ const OfficialReport: React.FC<OfficialReportProps> = ({ opds, progress, setting
       <tbody>
         {data.map((item, index) => {
           const opd = opds.find(o => o.id === item.opdId);
-          const totalPktRow = item.todayPenyediaPaket + item.todaySwakelolaPaket + item.todayPdSPaket;
-          const totalPaguRow = item.todayPenyediaPagu + item.todaySwakelolaPagu + item.todayPdSPagu;
+          const totalPktRow = (item.todayPenyediaPaket || 0) + (item.todaySwakelolaPaket || 0) + (item.todayPdSPaket || 0);
+          const totalPaguRow = (item.todayPenyediaPagu || 0) + (item.todaySwakelolaPagu || 0) + (item.todayPdSPagu || 0);
           const pctTodayRow = item.paguTarget > 0 ? (totalPaguRow / item.paguTarget) * 100 : 0;
 
           return (
@@ -234,22 +232,53 @@ const OfficialReport: React.FC<OfficialReportProps> = ({ opds, progress, setting
            <ReportTableContent data={filteredData} startIdx={0} />
         </div>
 
-        <div className="mt-8 signature-block text-[8px] md:text-[9.5px]">
-          <div className="space-y-1">
-            <p className="font-bold underline uppercase tracking-widest text-[9px] mb-2">Sumber Data :</p>
-            <ul className="list-decimal pl-4 space-y-0.5">
-              <li>SiRUP LKPP RI</li>
-              <li>BPKAD Prov. NTB (SIPD-RI)</li>
-            </ul>
-          </div>
+        <div className="mt-8 space-y-6">
+          <div className="flex flex-col md:flex-row justify-between items-start gap-8">
+            <div className="space-y-4">
+              <div className="space-y-1">
+                <p className="font-bold underline uppercase tracking-widest text-[9px]">Sumber Data :</p>
+                <ul className="text-[8.5px] space-y-0.5">
+                  <li>1. SiRUP LKPP RI</li>
+                  <li>2. BPKAD Prov. NTB</li>
+                </ul>
+              </div>
 
-          <div className="text-center w-64 md:w-80">
-            <p className="mb-20 uppercase leading-relaxed font-bold">
-              Mataram, {new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}<br />
-              {settings.pejabatJabatan},
-            </p>
-            <p className="font-black underline uppercase tracking-tight text-[11px] mb-1">{settings.pejabatNama}</p>
-            <p className="font-bold text-[10px]">NIP. {settings.pejabatNip}</p>
+              <div className="space-y-2">
+                <p className="font-bold uppercase tracking-widest text-[9px]">Keterangan :</p>
+                <div className="space-y-1 text-[8.5px]">
+                  <div className="flex items-center gap-2">
+                    <div className="w-12 h-3 bg-[#FF0000] border border-black"></div>
+                    <span>Terumumkan (0% - 50%)</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-12 h-3 bg-[#FFFF00] border border-black"></div>
+                    <span>Sudah Mengumumkan (51% - 99%)</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-12 h-3 bg-[#00B050] border border-black"></div>
+                    <span>Sudah Sesuai (100%)</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-12 h-3 bg-[#00B0F0] border border-black"></div>
+                    <span>kelebihan Mengumumkan (&gt;100%)</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-1 text-[8.5px] font-bold">
+                <p>* Data pagu ditampilkan dalam satuan jutaan rupiah;</p>
+                <p>* Pagu Pengadaan (selain dari kode akun : 5.1.01 , 5.1.03 , 5.1.04 dan 5.4 dan tagging NP) otomatis terisi apabila sudah melakukan penarikan data RKAD dari aplikasi SIPD.</p>
+              </div>
+            </div>
+
+            <div className="text-center w-64 md:w-80 shrink-0">
+              <p className="mb-20 uppercase leading-relaxed font-bold text-[9.5px]">
+                Mataram, {new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}<br />
+                {settings.pejabatJabatan},
+              </p>
+              <p className="font-black underline uppercase tracking-tight text-[11px] mb-1">{settings.pejabatNama}</p>
+              <p className="font-bold text-[10px]">NIP. {settings.pejabatNip}</p>
+            </div>
           </div>
         </div>
       </div>
