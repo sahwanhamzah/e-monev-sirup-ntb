@@ -232,8 +232,8 @@ const OfficialReport: React.FC<OfficialReportProps> = ({ opds, progress, setting
            <ReportTableContent data={filteredData} startIdx={0} />
         </div>
 
-        <div className="mt-8 space-y-6">
-          <div className="flex flex-col md:flex-row justify-between items-start gap-8">
+        <div className="mt-8 signature-block">
+          <div className="flex flex-col md:flex-row justify-between items-start gap-8 w-full">
             <div className="space-y-4">
               <div className="space-y-1">
                 <p className="font-bold underline uppercase tracking-widest text-[9px]">Sumber Data :</p>
@@ -271,9 +271,9 @@ const OfficialReport: React.FC<OfficialReportProps> = ({ opds, progress, setting
               </div>
             </div>
 
-            <div className="text-center w-64 md:w-80 shrink-0">
+            <div className="text-center w-64 md:w-80 shrink-0 self-start">
               <p className="mb-20 uppercase leading-relaxed font-bold text-[9.5px]">
-                Mataram, {new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}<br />
+                Mataram, {new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }).toUpperCase()}<br />
                 {settings.pejabatJabatan},
               </p>
               <p className="font-black underline uppercase tracking-tight text-[11px] mb-1">{settings.pejabatNama}</p>
