@@ -9,9 +9,10 @@ import OPDManagement from './pages/OPDManagement';
 import UserManagement from './pages/UserManagement';
 import BackupRestore from './pages/BackupRestore';
 import Login from './pages/Login';
-import TVMonitor from './pages/TVMonitor'; // New Page
+import TVMonitor from './pages/TVMonitor';
 import { useAuth, useAppData } from './hooks';
 import { Save, CheckCircle2, Cloud, CloudOff, Loader2 } from 'lucide-react';
+import { ProgressData, OPD } from './types';
 
 const App: React.FC = () => {
   const { isLoading, isSaving, showToast, isCloudActive, opds, setOpds, progress, setProgress, news, setNews, users, setUsers, settings, setSettings, sync } = useAppData();
@@ -28,25 +29,88 @@ const App: React.FC = () => {
   if (!isLoggedIn) return <Login onLogin={login} error={loginError} opds={opds} progress={progress} news={news} />;
 
   const handleUpdate = async (type: string, data: any) => {
+    let updatedOpds = [...opds];
+    let updatedProgress = [...progress];
+    let updatedNews = [...news];
+    let updatedUsers = [...users];
+    let updatedSettings = { ...settings };
+
     if (type === 'opd') {
-      const updatedOpds = Array.isArray(data) ? data : opds.map(o => o.id === data.id ? data : o).concat(opds.find(o => o.id === data.id) ? [] : [data]);
+      // 1. Update/Add OPD
+      if (Array.isArray(data)) {
+        updatedOpds = data;
+      } else {
+        const index = opds.findIndex(o => o.id === data.id);
+        if (index >= 0) {
+          updatedOpds[index] = data;
+        } else {
+          updatedOpds.push(data);
+        }
+      }
+      
+      // 2. SINKRONISASI OTOMATIS: Pastikan setiap OPD punya baris progres dan paguTarget yang benar
+      updatedProgress = updatedOpds.map(opd => {
+        const existingProg = progress.find(p => p.opdId === opd.id);
+        if (existingProg) {
+          return { ...existingProg, paguTarget: opd.paguMurni };
+        }
+        return {
+          opdId: opd.id,
+          paguTarget: opd.paguMurni,
+          prevPercent: 0,
+          todayPenyediaPaket: 0, todayPenyediaPagu: 0,
+          todaySwakelolaPaket: 0, todaySwakelolaPagu: 0,
+          todayPdSPaket: 0, todayPdSPagu: 0,
+          updatedAt: new Date().toISOString()
+        };
+      });
+
       setOpds(updatedOpds);
-      await sync({ opds: updatedOpds });
+      setProgress(updatedProgress);
+      await sync({ opds: updatedOpds, progress: updatedProgress });
+
     } else if (type === 'progress') {
-      const updatedProg = Array.isArray(data) ? data : progress.map(p => p.opdId === data.opdId ? data : p);
-      setProgress(updatedProg);
-      await sync({ progress: updatedProg });
+      // Saat menyimpan progres, hitung persentase sebelumnya jika diminta (opsional)
+      // Namun di sini kita hanya update data harian
+      if (Array.isArray(data)) {
+        updatedProgress = data;
+      } else {
+        updatedProgress = progress.map(p => p.opdId === data.opdId ? data : p);
+      }
+      setProgress(updatedProgress);
+      await sync({ progress: updatedProgress });
+
+    } else if (type === 'finalize_progress') {
+      // FITUR KHUSUS: Pindahkan Progres Hari ini ke Progres Sebelumnya
+      updatedProgress = progress.map(p => {
+        const totalPagu = p.todayPenyediaPagu + p.todaySwakelolaPagu + p.todayPdSPagu;
+        const currentPct = p.paguTarget > 0 ? (totalPagu / p.paguTarget) * 100 : 0;
+        return {
+          ...p,
+          prevPercent: currentPct,
+          updatedAt: new Date().toISOString()
+        };
+      });
+      setProgress(updatedProgress);
+      await sync({ progress: updatedProgress });
+      alert("Berhasil! Seluruh progres hari ini telah dipindahkan ke kolom 'Sebelumnya'.");
+
     } else if (type === 'news') {
-      const updatedNews = news.find(n => n.id === data.id) ? news.map(n => n.id === data.id ? data : n) : [data, ...news];
+      updatedNews = news.find(n => n.id === data.id) ? news.map(n => n.id === data.id ? data : n) : [data, ...news];
+      setNews(updatedNews);
+      await sync({ news: updatedNews });
+    } else if (type === 'news_del') {
+      updatedNews = news.filter(n => n.id !== data);
       setNews(updatedNews);
       await sync({ news: updatedNews });
     } else if (type === 'user') {
-      const updatedUsers = users.find(u => u.id === data.id) ? users.map(u => u.id === data.id ? data : u) : [...users, data];
+      updatedUsers = users.find(u => u.id === data.id) ? users.map(u => u.id === data.id ? data : u) : [...users, data];
       setUsers(updatedUsers);
       await sync({ users: updatedUsers });
     } else if (type === 'settings') {
-      setSettings(data);
-      await sync({ settings: data });
+      updatedSettings = data;
+      setSettings(updatedSettings);
+      await sync({ settings: updatedSettings });
     }
   };
 
@@ -62,6 +126,14 @@ const App: React.FC = () => {
               <div className="h-4 w-[1px] bg-slate-200"></div>
               <span className="text-slate-400">Status: {isSaving ? 'Sinkronisasi...' : 'Tersimpan'}</span>
            </div>
+           {currentPage === 'monitoring' && (
+             <button 
+               onClick={() => { if(confirm('Apakah Anda yakin ingin menjadikan seluruh progres saat ini sebagai "Persentase Sebelumnya"?')) handleUpdate('finalize_progress', null) }}
+               className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-lg transition-all"
+             >
+               Finalisasi Progres (Set Sblmnya)
+             </button>
+           )}
         </div>
       )}
 
