@@ -25,7 +25,7 @@ const OfficialReport: React.FC<OfficialReportProps> = ({ opds, progress, setting
     });
   }, [progress, opds, searchTerm]);
 
-  // Pagination Logic
+  // Pagination Logic (Hanya untuk tampilan layar agar tidak berat)
   const totalEntries = filteredData.length;
   const totalPages = Math.ceil(totalEntries / pageSize);
   const paginatedData = useMemo(() => {
@@ -45,14 +45,12 @@ const OfficialReport: React.FC<OfficialReportProps> = ({ opds, progress, setting
       acc.todaySwPagu += (curr.todaySwakelolaPagu || 0);
       acc.todayPdSPaket += (curr.todayPdSPaket || 0);
       acc.todayPdSPagu += (curr.todayPdSPagu || 0);
-      acc.totalPrevPct += (curr.prevPercent || 0);
       return acc;
     }, {
       paguTarget: 0,
       todayPenPaket: 0, todayPenPagu: 0,
       todaySwPaket: 0, todaySwPagu: 0,
       todayPdSPaket: 0, todayPdSPagu: 0,
-      totalPrevPct: 0
     });
   };
 
@@ -60,8 +58,6 @@ const OfficialReport: React.FC<OfficialReportProps> = ({ opds, progress, setting
   const totalBarisPaket = totals.todayPenPaket + totals.todaySwPaket + totals.todayPdSPaket;
   const totalBarisPagu = totals.todayPenPagu + totals.todaySwPagu + totals.todayPdSPagu;
   const totalPctToday = totals.paguTarget > 0 ? (totalBarisPagu / totals.paguTarget) * 100 : 0;
-  
-  const avgPrevPct = filteredData.length > 0 ? totals.totalPrevPct / filteredData.length : 0;
 
   const getPageNumbers = () => {
     const pages = [];
@@ -73,6 +69,7 @@ const OfficialReport: React.FC<OfficialReportProps> = ({ opds, progress, setting
     return pages;
   };
 
+  // Komponen Tabel Inti yang digunakan baik di layar maupun cetak
   const ReportTableContent = ({ data, startIdx }: { data: ProgressData[], startIdx: number }) => (
     <table className="w-full text-[8.5px] md:text-[9.5px] border-collapse border border-black leading-tight bg-white">
       <thead>
@@ -104,8 +101,8 @@ const OfficialReport: React.FC<OfficialReportProps> = ({ opds, progress, setting
       <tbody>
         {data.map((item, index) => {
           const opd = opds.find(o => o.id === item.opdId);
-          const totalPktRow = (item.todayPenyediaPaket || 0) + (item.todaySwakelolaPaket || 0) + (item.todayPdSPaket || 0);
-          const totalPaguRow = (item.todayPenyediaPagu || 0) + (item.todaySwakelolaPagu || 0) + (item.todayPdSPagu || 0);
+          const totalPktRow = item.todayPenyediaPaket + item.todaySwakelolaPaket + item.todayPdSPaket;
+          const totalPaguRow = item.todayPenyediaPagu + item.todaySwakelolaPagu + item.todayPdSPagu;
           const pctTodayRow = item.paguTarget > 0 ? (totalPaguRow / item.paguTarget) * 100 : 0;
 
           return (
@@ -143,9 +140,7 @@ const OfficialReport: React.FC<OfficialReportProps> = ({ opds, progress, setting
           <td className="border border-black p-1">{formatReportNumber(totals.todayPdSPagu)}</td>
           <td className="border border-black p-1">{formatReportNumber(totalBarisPaket)}</td>
           <td className="border border-black p-1">{formatReportNumber(totalBarisPagu)}</td>
-          <td className={`border border-black p-1 text-center ${getStatusBgClass(avgPrevPct)}`}>
-            {formatReportDecimal(avgPrevPct)}
-          </td>
+          <td className="border border-black p-1 text-center">0,00</td>
           <td className={`border border-black p-1 text-center ${getStatusBgClass(totalPctToday)}`}>
             {formatReportDecimal(totalPctToday)}
           </td>
@@ -170,6 +165,7 @@ const OfficialReport: React.FC<OfficialReportProps> = ({ opds, progress, setting
       </div>
 
       <div className="bg-white p-4 md:p-8 shadow-sm border border-slate-200 rounded-lg print-container">
+        {/* Main Header */}
         <div className="text-center mb-8">
           <h1 className="text-sm md:text-lg font-black uppercase tracking-tight leading-tight">
             PROGRES RENCANA UMUM PENGADAAN (RUP) APBD PEMPROV NTB TA. {settings.ta}
@@ -179,6 +175,7 @@ const OfficialReport: React.FC<OfficialReportProps> = ({ opds, progress, setting
           </div>
         </div>
 
+        {/* Tampilan Layar: Dengan Pagination & Search (disembunyikan saat cetak) */}
         <div className="no-print">
           <div className="mb-6 flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="flex items-center gap-2 text-sm font-medium text-slate-700">
@@ -220,58 +217,51 @@ const OfficialReport: React.FC<OfficialReportProps> = ({ opds, progress, setting
             </div>
             <div className="flex items-center -space-x-px">
               <button onClick={() => setCurrentPage(1)} disabled={currentPage === 1} className="px-4 py-2 text-sm font-medium bg-white border border-slate-300 rounded-l-lg disabled:opacity-50">Pertama</button>
+              <button onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))} disabled={currentPage === 1} className="px-4 py-2 text-sm font-medium bg-white border border-slate-300 disabled:opacity-50">Sebelumnya</button>
               {getPageNumbers().map(num => (
                 <button key={num} onClick={() => setCurrentPage(num)} className={`px-4 py-2 text-sm font-bold border transition-all ${currentPage === num ? 'bg-[#d9534f] border-[#d9534f] text-white z-10' : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-50'}`}>{num}</button>
               ))}
+              <button onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))} disabled={currentPage === totalPages || totalPages === 0} className="px-4 py-2 text-sm font-medium bg-white border border-slate-300 disabled:opacity-50">Selanjutnya</button>
               <button onClick={() => setCurrentPage(totalPages)} disabled={currentPage === totalPages || totalPages === 0} className="px-4 py-2 text-sm font-medium bg-white border border-slate-300 rounded-r-lg disabled:opacity-50">Terakhir</button>
             </div>
           </div>
         </div>
 
+        {/* Tampilan Cetak: Tampilkan Seluruh Data tanpa batasan halaman */}
         <div className="print-only">
            <ReportTableContent data={filteredData} startIdx={0} />
         </div>
 
-        <div className="mt-8 signature-block">
-          <div className="flex flex-col md:flex-row justify-between items-start gap-8 w-full">
-            <div className="space-y-4">
-              <div className="space-y-1">
-                <p className="font-bold underline uppercase tracking-widest text-[9px]">Sumber Data :</p>
-                <ul className="text-[8.5px] space-y-0.5">
-                  <li>1. SiRUP LKPP RI</li>
-                  <li>2. BPKAD Prov. NTB</li>
-                </ul>
+        {/* Footer Laporan / Tanda Tangan */}
+        <div className="mt-8 signature-block text-[8px] md:text-[9.5px]">
+          <div className="space-y-1">
+            <p className="font-bold underline uppercase tracking-widest text-[9px] mb-2">Sumber Data :</p>
+            <ul className="list-decimal pl-4 space-y-0.5">
+              <li>SiRUP LKPP RI</li>
+              <li>BPKAD Prov. NTB (SIPD-RI)</li>
+            </ul>
+            <div className="mt-6 space-y-1.5">
+              <p className="font-bold underline uppercase tracking-widest text-[9px] mb-1">Keterangan Warna :</p>
+              <div className="flex items-center gap-2">
+                <div className="w-5 h-3 bg-[#FF0000] border border-black"></div> 
+                <span className="font-medium">0% - 50% (Atensi)</span>
               </div>
-
-              <div className="space-y-2">
-                <p className="font-bold uppercase tracking-widest text-[9px]">Keterangan :</p>
-                <div className="space-y-1 text-[8.5px]">
-                  <div className="flex items-center gap-2">
-                    <div className="w-12 h-3 bg-[#FF0000] border border-black"></div>
-                    <span>Terumumkan (0% - 50%)</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-12 h-3 bg-[#FFFF00] border border-black"></div>
-                    <span>Sudah Mengumumkan (51% - 99%)</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-12 h-3 bg-[#00B050] border border-black"></div>
-                    <span>Sudah Sesuai (100%)</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-12 h-3 bg-[#00B0F0] border border-black"></div>
-                    <span>kelebihan Mengumumkan (&gt;100%)</span>
-                  </div>
-                </div>
+              <div className="flex items-center gap-2">
+                <div className="w-5 h-3 bg-[#FFFF00] border border-black"></div> 
+                <span className="font-medium">51% - 99% (Sedang)</span>
               </div>
-
-              <div className="space-y-1 text-[8.5px] font-bold">
-                <p>* Data pagu ditampilkan dalam satuan jutaan rupiah;</p>
-                <p>* Pagu Pengadaan (selain dari kode akun : 5.1.01 , 5.1.03 , 5.1.04 dan 5.4 dan tagging NP) otomatis terisi apabila sudah melakukan penarikan data RKAD dari aplikasi SIPD.</p>
+              <div className="flex items-center gap-2">
+                <div className="w-5 h-3 bg-[#00B050] border border-black"></div> 
+                <span className="font-medium">100% (Sesuai)</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-5 h-3 bg-[#00B0F0] border border-black"></div> 
+                <span className="font-medium">&gt;100% (Kelebihan)</span>
               </div>
             </div>
+          </div>
 
-            <div className="text-center w-64 md:w-80">
+          <div className="text-center w-64 md:w-80">
             <p className="mb-20 uppercase leading-relaxed font-bold">
               Mataram, {new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}<br />
               {settings.pejabatJabatan},
@@ -286,4 +276,3 @@ const OfficialReport: React.FC<OfficialReportProps> = ({ opds, progress, setting
 };
 
 export default OfficialReport;
-
