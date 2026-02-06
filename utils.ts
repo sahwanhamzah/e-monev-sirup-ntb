@@ -1,6 +1,7 @@
 
 export const formatReportNumber = (value: number): string => {
-  if (value === 0) return '-';
+  if (value === undefined || value === null) return '0';
+  if (value === 0) return '0';
   return new Intl.NumberFormat('id-ID', {
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
@@ -8,46 +9,43 @@ export const formatReportNumber = (value: number): string => {
 };
 
 export const formatReportDecimal = (value: number): string => {
-  // Terapkan pembulatan ke bilangan bulat terdekat (contoh: 99,98 -> 100)
-  // Namun tetap tampilkan 2 desimal (,00) untuk menjaga estetika laporan resmi
-  const val = Math.round(value || 0);
+  // Selalu tampilkan 2 desimal untuk estetika laporan resmi
+  const val = value || 0;
   return new Intl.NumberFormat('id-ID', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(val).replace('.', ',');
 };
 
-// Fungsi untuk dashboard
+// Fungsi untuk dashboard (Tanpa desimal untuk kebersihan visual)
 export const formatCurrencyMillions = (value: number): string => {
   return new Intl.NumberFormat('id-ID', {
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
-  }).format(value);
+  }).format(value || 0);
 };
 
 export const formatPercent = (value: number): string => {
-  // Terapkan pembulatan ke bilangan bulat terdekat untuk dashboard
-  const rounded = Math.round(value || 0);
+  const val = value || 0;
   return new Intl.NumberFormat('id-ID', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  }).format(rounded) + '%';
+  }).format(val) + '%';
 };
 
 /**
- * Menentukan class warna background berdasarkan persentase yang sudah dibulatkan
- * Aturan sesuai permintaan:
- * 🔴 0–50%  : Merah (#FF0000)
- * 🟡 51–99% : Kuning (#FFFF00)
- * 🟢 100%   : Hijau (#00B050)
- * 🔵 >100%  : Biru (#00B0F0)
+ * Menentukan class warna background berdasarkan persentase
+ * 🔴 0–50%  : Merah
+ * 🟡 51–99% : Kuning
+ * 🟢 100%   : Hijau
+ * 🔵 >100%  : Biru
  */
 export const getStatusBgClass = (percent: number): string => {
-  const rounded = Math.round(percent || 0);
+  const val = Math.round(percent || 0);
   
-  if (rounded <= 50) return 'bg-[#FF0000] text-white font-bold';
-  if (rounded < 100) return 'bg-[#FFFF00] text-black font-bold';
-  if (rounded === 100) return 'bg-[#00B050] text-white font-bold';
+  if (val <= 50) return 'bg-[#FF0000] text-white font-bold';
+  if (val < 100) return 'bg-[#FFFF00] text-black font-bold';
+  if (val === 100) return 'bg-[#00B050] text-white font-bold';
   return 'bg-[#00B0F0] text-white font-bold';
 };
 
