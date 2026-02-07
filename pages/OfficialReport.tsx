@@ -78,8 +78,7 @@ const OfficialReport: React.FC<OfficialReportProps> = ({ opds, progress, setting
           <th rowSpan={3} className="border border-black p-1 text-left min-w-[200px]">Satuan Kerja</th>
           <th rowSpan={3} className="border border-black p-1 w-20">Pagu Pengadaan</th>
           <th colSpan={8} className="border border-black p-1 bg-[#00B0F0] text-white">TERUMUMKAN DI SIRUP</th>
-          <th rowSpan={3} className="border border-black p-1 w-12 bg-[#00B0F0] text-white">Persentase (%) Sblmnya</th>
-          <th rowSpan={3} className="border border-black p-1 w-12 bg-[#00B0F0] text-white">Persentase (%) Hari Ini</th>
+          <th rowSpan={3} className="border border-black p-1 w-16 bg-[#00B0F0] text-white">Persentase (%) Hari Ini</th>
         </tr>
         <tr className="bg-[#FFC000] text-center font-bold">
           <th colSpan={2} className="border border-black p-1">Penyedia</th>
@@ -101,8 +100,8 @@ const OfficialReport: React.FC<OfficialReportProps> = ({ opds, progress, setting
       <tbody>
         {data.map((item, index) => {
           const opd = opds.find(o => o.id === item.opdId);
-          const totalPktRow = item.todayPenyediaPaket + item.todaySwakelolaPaket + item.todayPdSPaket;
-          const totalPaguRow = item.todayPenyediaPagu + item.todaySwakelolaPagu + item.todayPdSPagu;
+          const totalPktRow = (item.todayPenyediaPaket || 0) + (item.todaySwakelolaPaket || 0) + (item.todayPdSPaket || 0);
+          const totalPaguRow = (item.todayPenyediaPagu || 0) + (item.todaySwakelolaPagu || 0) + (item.todayPdSPagu || 0);
           const pctTodayRow = item.paguTarget > 0 ? (totalPaguRow / item.paguTarget) * 100 : 0;
 
           return (
@@ -118,9 +117,6 @@ const OfficialReport: React.FC<OfficialReportProps> = ({ opds, progress, setting
               <td className="border border-black p-0.5">{formatReportNumber(item.todayPdSPagu)}</td>
               <td className="border border-black p-0.5 font-bold">{formatReportNumber(totalPktRow)}</td>
               <td className="border border-black p-0.5 font-bold">{formatReportNumber(totalPaguRow)}</td>
-              <td className={`border border-black p-0.5 text-center font-bold ${getStatusBgClass(item.prevPercent)}`}>
-                {formatReportDecimal(item.prevPercent)}
-              </td>
               <td className={`border border-black p-0.5 text-center font-bold ${getStatusBgClass(pctTodayRow)}`}>
                 {formatReportDecimal(pctTodayRow)}
               </td>
@@ -140,7 +136,6 @@ const OfficialReport: React.FC<OfficialReportProps> = ({ opds, progress, setting
           <td className="border border-black p-1">{formatReportNumber(totals.todayPdSPagu)}</td>
           <td className="border border-black p-1">{formatReportNumber(totalBarisPaket)}</td>
           <td className="border border-black p-1">{formatReportNumber(totalBarisPagu)}</td>
-          <td className="border border-black p-1 text-center">0,00</td>
           <td className={`border border-black p-1 text-center ${getStatusBgClass(totalPctToday)}`}>
             {formatReportDecimal(totalPctToday)}
           </td>
