@@ -452,7 +452,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, error, opds, progress, news }) =
 
           {/* VIEW: REKAP PUBLIK */}
           {activeView === 'rekap' && (
-            <div className="w-full max-w-7xl animate-in fade-in slide-in-from-bottom-6 duration-700 pb-20">
+            <div className="w-full max-w-7xl animate-in fade-in slide-in-from-bottom-6 duration-700 px-4">
               <div className="text-center mb-10">
                 <h1 className="text-3xl font-black text-slate-900 tracking-tight drop-shadow-sm">DATA REALTIME PROGRES RUP PROVINSI NTB</h1>
                 <div className="bg-[#d9534f] text-white inline-block px-6 py-2 mt-4 font-black text-sm rounded-xl shadow-lg border border-red-400/30">
@@ -467,7 +467,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, error, opds, progress, news }) =
                 <StatBox title="OPD Perlu Atensi" value={`${criticalOPDsCount} SKPD`} icon={<AlertCircle size={24}/>} color="rose" />
               </div>
 
-              <div className="bg-white/90 backdrop-blur-md rounded-3xl shadow-xl border border-slate-200 overflow-hidden">
+              <div className="bg-white/90 backdrop-blur-md rounded-3xl shadow-xl border border-slate-200 overflow-hidden mb-12">
                 <div className="p-6 border-b border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4">
                   <div className="flex items-center gap-2 text-sm font-medium text-slate-700">
                     Tampilkan <select value={pageSize} onChange={(e) => setPageSize(Number(e.target.value))} className="mx-1 px-2 py-1.5 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-red-500/20 transition-all bg-white"><option value={10}>10</option><option value={25}>25</option><option value={50}>50</option><option value={100}>100</option></select> entri
@@ -485,7 +485,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, error, opds, progress, news }) =
                         <th rowSpan={3} className="border border-slate-400 p-4 min-w-[320px] text-left">Satuan Kerja</th>
                         <th rowSpan={3} className="border border-slate-400 p-4 w-32">Pagu Pengadaan</th>
                         <th colSpan={8} className="border border-slate-400 p-4 bg-[#00B0F0] text-white">TERUMUMKAN DI SIRUP</th>
-                        <th rowSpan={3} className="border border-slate-400 p-4 w-28 bg-[#00B0F0] text-white">Persentase %</th>
+                        <th rowSpan={3} className="border border-slate-400 p-4 w-32 bg-[#00B0F0] text-white">Persentase Hari Ini</th>
                       </tr>
                       <tr className="bg-[#FFC000] text-slate-900 text-center font-black uppercase border-b border-slate-400">
                         <th colSpan={2} className="border border-slate-400 p-2">Penyedia</th>
@@ -519,11 +519,10 @@ const Login: React.FC<LoginProps> = ({ onLogin, error, opds, progress, news }) =
                             <td className="p-4 text-right border-r border-slate-300">{formatReportNumber(item.todayPdSPagu)}</td>
                             <td className="p-4 text-center font-black border-r border-slate-300">{formatReportNumber(totalPkt)}</td>
                             <td className="p-4 text-right font-black border-r border-slate-300">{formatReportNumber(totalPagu)}</td>
-                            <td className={`p-4 text-center font-black border-r border-slate-300 ${getStatusBgClass(item.prevPercent)}`}>{formatReportDecimal(item.prevPercent)}</td>
                             <td className={`p-4 text-center font-black ${getStatusBgClass(pctToday)}`}>{formatReportDecimal(pctToday)}</td>
                           </tr>
                         );
-                      }) : <tr><td colSpan={13} className="p-20 text-center text-slate-400 font-bold uppercase tracking-widest bg-slate-50/80 italic border border-slate-300">Data tidak ditemukan...</td></tr>}
+                      }) : <tr><td colSpan={12} className="p-20 text-center text-slate-400 font-bold uppercase tracking-widest bg-slate-50/80 italic border border-slate-300">Data tidak ditemukan...</td></tr>}
                     </tbody>
                   </table>
                 </div>
@@ -537,6 +536,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, error, opds, progress, news }) =
                   </div>
                 </div>
               </div>
+              <Footer activeView={activeView} setActiveView={setActiveView} />
             </div>
           )}
 
