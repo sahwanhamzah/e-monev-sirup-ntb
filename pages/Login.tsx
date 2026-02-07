@@ -572,7 +572,40 @@ const Login: React.FC<LoginProps> = ({ onLogin, error, opds, progress, news }) =
               </div>
               <Footer activeView={activeView} setActiveView={setActiveView} />
             </div>
-          )}
+
+      <div className="print-only">
+           <ReportTableContent data={filteredData} startIdx={0} />
+        </div>
+
+        {/* Footer Laporan / Tanda Tangan */}
+        <div className="mt-8 signature-block text-[8px] md:text-[9.5px]">
+          <div className="space-y-1">
+            <p className="font-bold underline uppercase tracking-widest text-[9px] mb-2">Sumber Data :</p>
+            <ul className="list-decimal pl-4 space-y-0.5">
+              <li>SiRUP LKPP RI</li>
+              <li>BPKAD Prov. NTB (SIPD-RI)</li>
+            </ul>
+            <div className="mt-6 space-y-1.5">
+              <p className="font-bold underline uppercase tracking-widest text-[9px] mb-1">Keterangan Warna :</p>
+              <div className="flex items-center gap-2">
+                <div className="w-5 h-3 bg-[#FF0000] border border-black"></div> 
+                <span className="font-medium">0% - 50% (Atensi)</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-5 h-3 bg-[#FFFF00] border border-black"></div> 
+                <span className="font-medium">51% - 99% (Sedang)</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-5 h-3 bg-[#00B050] border border-black"></div> 
+                <span className="font-medium">100% (Sesuai)</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-5 h-3 bg-[#00B0F0] border border-black"></div> 
+                <span className="font-medium">&gt;100% (Kelebihan)</span>
+              </div>
+            </div>
+          </div>
+        )}
 
           {/* VIEW: BERITA */}
           {activeView === 'berita' && (
