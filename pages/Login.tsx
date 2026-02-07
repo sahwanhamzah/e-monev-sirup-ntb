@@ -572,11 +572,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, error, opds, progress, news }) =
               </div>
               <Footer activeView={activeView} setActiveView={setActiveView} />
             </div>
-
-      <div className="print-only">
-           <ReportTableContent data={filteredData} startIdx={0} />
-        </div>
-
+      
         {/* Footer Laporan / Tanda Tangan */}
         <div className="mt-8 signature-block text-[8px] md:text-[9.5px]">
           <div className="space-y-1">
