@@ -412,7 +412,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, error, opds, progress, news }) =
 
           {/* VIEW: LOGIN */}
           {activeView === 'login' && (
-            <div className="w-full max-w-7xl px-4 flex flex-col items-center">
+            <div className="w-full px-4 flex flex-col items-center">
               <div className="w-full min-h-[calc(100vh-120px)] flex flex-col items-center justify-center animate-in zoom-in-95 duration-500">
                 <div className="w-full max-w-[420px] bg-black/40 backdrop-blur-xl rounded-[2rem] shadow-2xl p-10 flex flex-col items-center border border-white/10 relative overflow-hidden">
                   <button onClick={() => setActiveView('rekap')} className="absolute top-4 right-4 p-2 text-white/40 hover:text-white transition-colors">
@@ -457,87 +457,116 @@ const Login: React.FC<LoginProps> = ({ onLogin, error, opds, progress, news }) =
 
           {/* VIEW: REKAP PUBLIK */}
           {activeView === 'rekap' && (
-            <div className="w-full max-w-7xl animate-in fade-in slide-in-from-bottom-6 duration-700 px-4">
-              <div className="text-center mb-10">
-                <h1 className="text-3xl font-black text-slate-900 tracking-tight drop-shadow-sm">DATA REALTIME PROGRES RUP PROVINSI NTB</h1>
-                <div className="bg-[#d9534f] text-white inline-block px-6 py-2 mt-4 font-black text-sm rounded-xl shadow-lg border border-red-400/30">
-                  {getCurrentTimestamp()}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
-                <StatBox title="Total Pagu Terinput" value={`Rp ${formatCurrencyMillions(totalPaguTerinput)} Jt`} icon={<TrendingUp size={24}/>} color="blue" />
-                <StatBox title="Total Paket" value={totalPaket.toLocaleString('id-ID')} icon={<Package size={24}/>} color="indigo" />
-                <StatBox title="Rata-rata Progres" value={formatPercent(avgPercent)} icon={<Percent size={24}/>} color="emerald" />
-                <StatBox title="OPD Perlu Atensi" value={`${criticalOPDsCount} SKPD`} icon={<AlertCircle size={24}/>} color="rose" />
-              </div>
-
-              <div className="bg-white/90 backdrop-blur-md rounded-3xl shadow-xl border border-slate-200 overflow-hidden mb-12">
-                <div className="p-6 border-b border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4">
-                  <div className="flex items-center gap-2 text-sm font-medium text-slate-700">
-                    Tampilkan <select value={pageSize} onChange={(e) => setPageSize(Number(e.target.value))} className="mx-1 px-2 py-1.5 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-red-500/20 transition-all bg-white"><option value={10}>10</option><option value={25}>25</option><option value={50}>50</option><option value={100}>100</option></select> entri
-                  </div>
-                  <div className="flex items-center gap-3 text-sm font-medium text-slate-700">
-                    Cari: <div className="relative"><input type="text" placeholder="..." className="pl-3 pr-10 py-1.5 border border-slate-300 rounded-lg outline-none focus:ring-4 focus:ring-red-500/10 transition-all shadow-sm w-full md:w-64" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} /><Search size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" /></div>
+            <div className="w-full animate-in fade-in slide-in-from-bottom-6 duration-700">
+              <div className="max-w-7xl mx-auto px-4">
+                <div className="text-center mb-10">
+                  <h1 className="text-3xl font-black text-slate-900 tracking-tight drop-shadow-sm">DATA REALTIME PROGRES RUP PROVINSI NTB</h1>
+                  <div className="bg-[#d9534f] text-white inline-block px-6 py-2 mt-4 font-black text-sm rounded-xl shadow-lg border border-red-400/30">
+                    {getCurrentTimestamp()}
                   </div>
                 </div>
 
-                <div className="overflow-x-auto custom-scrollbar">
-                  <table className="w-full text-[11px] border-collapse border border-slate-300">
-                    <thead>
-                      <tr className="bg-[#FFC000] text-slate-900 text-center font-black uppercase">
-                        <th rowSpan={3} className="border border-slate-400 p-4 w-12">No</th>
-                        <th rowSpan={3} className="border border-slate-400 p-4 min-w-[320px] text-left">Satuan Kerja</th>
-                        <th rowSpan={3} className="border border-slate-400 p-4 w-32">Pagu Pengadaan</th>
-                        <th colSpan={8} className="border border-slate-400 p-4 bg-[#00B0F0] text-white">TERUMUMKAN DI SIRUP</th>
-                        <th rowSpan={3} className="border border-slate-400 p-4 w-32 bg-[#00B0F0] text-white">Persentase Hari Ini</th>
-                      </tr>
-                      <tr className="bg-[#FFC000] text-slate-900 text-center font-black uppercase border-b border-slate-400">
-                        <th colSpan={2} className="border border-slate-400 p-2">Penyedia</th>
-                        <th colSpan={2} className="border border-slate-400 p-2">Swakelola</th>
-                        <th colSpan={2} className="border border-slate-400 p-2">Penyedia Dlm Swa</th>
-                        <th colSpan={2} className="border border-slate-400 p-2">Total</th>
-                      </tr>
-                      <tr className="bg-[#FFC000] text-slate-900 text-center font-black text-[9px] uppercase border-b border-slate-400">
-                        <th className="border border-slate-400 p-2">Paket</th><th className="border border-slate-400 p-2">Pagu</th>
-                        <th className="border border-slate-400 p-2">Paket</th><th className="border border-slate-400 p-2">Pagu</th>
-                        <th className="border border-slate-400 p-2">Paket</th><th className="border border-slate-400 p-2">Pagu</th>
-                        <th className="border border-slate-400 p-2">Pkt</th><th className="border border-slate-400 p-2">Pagu</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-300">
-                      {paginatedData.length > 0 ? paginatedData.map((item, index) => {
-                        const opd = opds.find(o => o.id === item.opdId);
-                        const totalPkt = item.todayPenyediaPaket + item.todaySwakelolaPaket + item.todayPdSPaket;
-                        const totalPagu = item.todayPenyediaPagu + item.todaySwakelolaPagu + item.todayPdSPagu;
-                        const pctToday = (totalPagu / (item.paguTarget || 1)) * 100;
-                        return (
-                          <tr key={item.opdId} className="hover:bg-slate-50 transition-colors group">
-                            <td className="p-4 text-center font-black text-slate-400 border-r border-slate-300 group-hover:text-[#d9534f]">{(currentPage-1)*pageSize+index+1}</td>
-                            <td className="p-4 font-bold text-slate-700 border-r border-slate-300">{opd?.name}</td>
-                            <td className="p-4 text-right font-black text-blue-600 border-r border-slate-300">{formatReportNumber(item.paguTarget)}</td>
-                            <td className="p-4 text-center border-r border-slate-300">{formatReportNumber(item.todayPenyediaPaket)}</td>
-                            <td className="p-4 text-right border-r border-slate-300">{formatReportNumber(item.todayPenyediaPagu)}</td>
-                            <td className="p-4 text-center border-r border-slate-300">{formatReportNumber(item.todaySwakelolaPaket)}</td>
-                            <td className="p-4 text-right border-r border-slate-300">{formatReportNumber(item.todaySwakelolaPagu)}</td>
-                            <td className="p-4 text-center border-r border-slate-300">{formatReportNumber(item.todayPdSPaket)}</td>
-                            <td className="p-4 text-right border-r border-slate-300">{formatReportNumber(item.todayPdSPagu)}</td>
-                            <td className="p-4 text-center font-black border-r border-slate-300">{formatReportNumber(totalPkt)}</td>
-                            <td className="p-4 text-right font-black border-r border-slate-300">{formatReportNumber(totalPagu)}</td>
-                            <td className={`p-4 text-center font-black ${getStatusBgClass(pctToday)}`}>{formatReportDecimal(pctToday)}</td>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
+                  <StatBox title="Total Pagu Terinput" value={`Rp ${formatCurrencyMillions(totalPaguTerinput)} Jt`} icon={<TrendingUp size={24}/>} color="blue" />
+                  <StatBox title="Total Paket" value={totalPaket.toLocaleString('id-ID')} icon={<Package size={24}/>} color="indigo" />
+                  <StatBox title="Rata-rata Progres" value={formatPercent(avgPercent)} icon={<Percent size={24}/>} color="emerald" />
+                  <StatBox title="OPD Perlu Atensi" value={`${criticalOPDsCount} SKPD`} icon={<AlertCircle size={24}/>} color="rose" />
+                </div>
+
+                <div className="bg-white/90 backdrop-blur-md rounded-3xl shadow-xl border border-slate-200 overflow-hidden mb-12">
+                  <div className="p-6 border-b border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4">
+                    <div className="flex items-center gap-2 text-sm font-medium text-slate-700">
+                      Tampilkan 
+                      <select 
+                        value={pageSize} 
+                        onChange={(e) => setPageSize(Number(e.target.value))} 
+                        className="mx-1 px-2 py-1.5 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-red-500/20 transition-all bg-white"
+                      >
+                        <option value={10}>10</option>
+                        <option value={25}>25</option>
+                        <option value={50}>50</option>
+                        <option value={100}>100</option>
+                      </select> 
+                      entri
+                    </div>
+                    <div className="flex items-center gap-3 text-sm font-medium text-slate-700">
+                      Cari: 
+                      <div className="relative">
+                        <input 
+                          type="text" 
+                          placeholder="..." 
+                          className="pl-3 pr-10 py-1.5 border border-slate-300 rounded-lg outline-none focus:ring-4 focus:ring-red-500/10 transition-all shadow-sm w-full md:w-64" 
+                          value={searchTerm} 
+                          onChange={e => setSearchTerm(e.target.value)} 
+                        />
+                        <Search size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="overflow-x-auto custom-scrollbar">
+                    <table className="w-full text-[11px] border-collapse border border-slate-300">
+                      <thead>
+                        <tr className="bg-[#FFC000] text-slate-900 text-center font-black uppercase">
+                          <th rowSpan={3} className="border border-slate-400 p-4 w-12">No</th>
+                          <th rowSpan={3} className="border border-slate-400 p-4 min-w-[320px] text-left">Satuan Kerja</th>
+                          <th rowSpan={3} className="border border-slate-400 p-4 w-32">Pagu Pengadaan</th>
+                          <th colSpan={8} className="border border-slate-400 p-4 bg-[#00B0F0] text-white">TERUMUMKAN DI SIRUP</th>
+                          <th rowSpan={3} className="border border-slate-400 p-4 w-32 bg-[#00B0F0] text-white">Persentase Hari Ini</th>
+                        </tr>
+                        <tr className="bg-[#FFC000] text-slate-900 text-center font-black uppercase border-b border-slate-400">
+                          <th colSpan={2} className="border border-slate-400 p-2">Penyedia</th>
+                          <th colSpan={2} className="border border-slate-400 p-2">Swakelola</th>
+                          <th colSpan={2} className="border border-slate-400 p-2">Penyedia Dlm Swa</th>
+                          <th colSpan={2} className="border border-slate-400 p-2">Total</th>
+                        </tr>
+                        <tr className="bg-[#FFC000] text-slate-900 text-center font-black text-[9px] uppercase border-b border-slate-400">
+                          <th className="border border-slate-400 p-2">Paket</th><th className="border border-slate-400 p-2">Pagu</th>
+                          <th className="border border-slate-400 p-2">Paket</th><th className="border border-slate-400 p-2">Pagu</th>
+                          <th className="border border-slate-400 p-2">Paket</th><th className="border border-slate-400 p-2">Pagu</th>
+                          <th className="border border-slate-400 p-2">Pkt</th><th className="border border-slate-400 p-2">Pagu</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-300">
+                        {paginatedData.length > 0 ? paginatedData.map((item, index) => {
+                          const opd = opds.find(o => o.id === item.opdId);
+                          const totalPkt = item.todayPenyediaPaket + item.todaySwakelolaPaket + item.todayPdSPaket;
+                          const totalPagu = item.todayPenyediaPagu + item.todaySwakelolaPagu + item.todayPdSPagu;
+                          const pctToday = (totalPagu / (item.paguTarget || 1)) * 100;
+                          return (
+                            <tr key={item.opdId} className="hover:bg-slate-50 transition-colors group">
+                              <td className="p-4 text-center font-black text-slate-400 border-r border-slate-300 group-hover:text-[#d9534f]">{(currentPage-1)*pageSize+index+1}</td>
+                              <td className="p-4 font-bold text-slate-700 border-r border-slate-300">{opd?.name}</td>
+                              <td className="p-4 text-right font-black text-blue-600 border-r border-slate-300">{formatReportNumber(item.paguTarget)}</td>
+                              <td className="p-4 text-center border-r border-slate-300">{formatReportNumber(item.todayPenyediaPaket)}</td>
+                              <td className="p-4 text-right border-r border-slate-300">{formatReportNumber(item.todayPenyediaPagu)}</td>
+                              <td className="p-4 text-center border-r border-slate-300">{formatReportNumber(item.todaySwakelolaPaket)}</td>
+                              <td className="p-4 text-right border-r border-slate-300">{formatReportNumber(item.todaySwakelolaPagu)}</td>
+                              <td className="p-4 text-center border-r border-slate-300">{formatReportNumber(item.todayPdSPaket)}</td>
+                              <td className="p-4 text-right border-r border-slate-300">{formatReportNumber(item.todayPdSPagu)}</td>
+                              <td className="p-4 text-center font-black border-r border-slate-300">{formatReportNumber(totalPkt)}</td>
+                              <td className="p-4 text-right font-black border-r border-slate-300">{formatReportNumber(totalPagu)}</td>
+                              <td className={`p-4 text-center font-black ${getStatusBgClass(pctToday)}`}>{formatReportDecimal(pctToday)}</td>
+                            </tr>
+                          );
+                        }) : (
+                          <tr>
+                            <td colSpan={12} className="p-20 text-center text-slate-400 font-bold uppercase tracking-widest bg-slate-50/80 italic border border-slate-300">
+                              Data tidak ditemukan...
+                            </td>
                           </tr>
-                        );
-                      }) : <tr><td colSpan={12} className="p-20 text-center text-slate-400 font-bold uppercase tracking-widest bg-slate-50/80 italic border border-slate-300">Data tidak ditemukan...</td></tr>}
-                    </tbody>
-                  </table>
-                </div>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
 
-                <div className="p-6 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-6">
-                  <div className="text-sm font-medium text-slate-600">Menampilkan {startEntry} sampai {endEntry} dari {totalEntries} entri</div>
-                  <div className="flex items-center -space-x-px">
-                    <button onClick={() => setCurrentPage(1)} disabled={currentPage === 1} className="px-4 py-2 text-sm font-medium bg-white border border-slate-300 rounded-l-lg hover:bg-slate-50 disabled:opacity-50 transition-colors">Pertama</button>
-                    {getPageNumbers().map(num => <button key={num} onClick={() => setCurrentPage(num)} className={`px-4 py-2 text-sm font-bold border transition-all ${currentPage === num ? 'bg-[#d9534f] border-[#d9534f] text-white z-10' : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-50'}`}>{num}</button>)}
-                    <button onClick={() => setCurrentPage(totalPages)} disabled={currentPage === totalPages || totalPages === 0} className="px-4 py-2 text-sm font-medium bg-white border border-slate-300 rounded-r-lg hover:bg-slate-50 disabled:opacity-50 transition-colors">Terakhir</button>
+                  <div className="p-6 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-6">
+                    <div className="text-sm font-medium text-slate-600">Menampilkan {startEntry} sampai {endEntry} dari {totalEntries} entri</div>
+                    <div className="flex items-center -space-x-px">
+                      <button onClick={() => setCurrentPage(1)} disabled={currentPage === 1} className="px-4 py-2 text-sm font-medium bg-white border border-slate-300 rounded-l-lg hover:bg-slate-50 disabled:opacity-50 transition-colors">Pertama</button>
+                      {getPageNumbers().map(num => <button key={num} onClick={() => setCurrentPage(num)} className={`px-4 py-2 text-sm font-bold border transition-all ${currentPage === num ? 'bg-[#d9534f] border-[#d9534f] text-white z-10' : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-50'}`}>{num}</button>)}
+                      <button onClick={() => setCurrentPage(totalPages)} disabled={currentPage === totalPages || totalPages === 0} className="px-4 py-2 text-sm font-medium bg-white border border-slate-300 rounded-r-lg hover:bg-slate-50 disabled:opacity-50 transition-colors">Terakhir</button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -547,29 +576,31 @@ const Login: React.FC<LoginProps> = ({ onLogin, error, opds, progress, news }) =
 
           {/* VIEW: BERITA */}
           {activeView === 'berita' && (
-            <div className="w-full max-w-7xl animate-in fade-in slide-in-from-bottom-6 duration-700 px-4">
-              <div className="text-center mb-16">
-                <h1 className="text-4xl font-black text-slate-900 mb-4 uppercase tracking-tight">Pengumuman & Update</h1>
-                <p className="text-slate-500 font-bold uppercase tracking-[0.4em]">Informasi Terkini Biro Pengadaan Barang dan Jasa NTB</p>
-                <div className="w-24 h-2 bg-[#d9534f] mx-auto mt-8 rounded-full shadow-lg shadow-red-900/20"></div>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
-                {news.length > 0 ? news.map((newsItem) => (
-                  <div key={newsItem.id} onClick={() => setSelectedNews(newsItem)} className="bg-white rounded-[2.5rem] shadow-xl border border-slate-200 p-8 hover:translate-y-[-10px] transition-all duration-500 cursor-pointer group relative overflow-hidden">
-                    <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity"><Newspaper size={64} /></div>
-                    <div className="flex justify-between items-start mb-6">
-                      <span className={`text-[10px] font-black px-4 py-2 rounded-xl uppercase tracking-widest ${newsItem.tag === 'Penting' ? 'bg-red-500 text-white' : 'bg-blue-500 text-white'}`}>{newsItem.tag}</span>
-                      <span className="text-xs text-slate-400 font-black tracking-widest uppercase flex items-center gap-2"><Calendar size={14} />{newsItem.date}</span>
+            <div className="w-full animate-in fade-in slide-in-from-bottom-6 duration-700">
+              <div className="max-w-7xl mx-auto px-4">
+                <div className="text-center mb-16">
+                  <h1 className="text-4xl font-black text-slate-900 mb-4 uppercase tracking-tight">Pengumuman & Update</h1>
+                  <p className="text-slate-500 font-bold uppercase tracking-[0.4em]">Informasi Terkini Biro Pengadaan Barang dan Jasa NTB</p>
+                  <div className="w-24 h-2 bg-[#d9534f] mx-auto mt-8 rounded-full shadow-lg shadow-red-900/20"></div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
+                  {news.length > 0 ? news.map((newsItem) => (
+                    <div key={newsItem.id} onClick={() => setSelectedNews(newsItem)} className="bg-white rounded-[2.5rem] shadow-xl border border-slate-200 p-8 hover:translate-y-[-10px] transition-all duration-500 cursor-pointer group relative overflow-hidden">
+                      <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity"><Newspaper size={64} /></div>
+                      <div className="flex justify-between items-start mb-6">
+                        <span className={`text-[10px] font-black px-4 py-2 rounded-xl uppercase tracking-widest ${newsItem.tag === 'Penting' ? 'bg-red-500 text-white' : 'bg-blue-500 text-white'}`}>{newsItem.tag}</span>
+                        <span className="text-xs text-slate-400 font-black tracking-widest uppercase flex items-center gap-2"><Calendar size={14} />{newsItem.date}</span>
+                      </div>
+                      <h3 className="text-xl font-black text-slate-800 mb-4 group-hover:text-[#d9534f] transition-colors leading-tight line-clamp-2">{newsItem.title}</h3>
+                      <p className="text-sm text-slate-500 leading-relaxed line-clamp-3 mb-8">{newsItem.excerpt}</p>
+                      <div className="pt-6 border-t border-slate-100 flex items-center justify-between">
+                        <span className="text-xs font-black text-slate-900 uppercase tracking-widest flex items-center gap-2 group-hover:translate-x-2 transition-transform">Baca Detail <ExternalLink size={14} className="text-[#d9534f]" /></span>
+                      </div>
                     </div>
-                    <h3 className="text-xl font-black text-slate-800 mb-4 group-hover:text-[#d9534f] transition-colors leading-tight line-clamp-2">{newsItem.title}</h3>
-                    <p className="text-sm text-slate-500 leading-relaxed line-clamp-3 mb-8">{newsItem.excerpt}</p>
-                    <div className="pt-6 border-t border-slate-100 flex items-center justify-between">
-                      <span className="text-xs font-black text-slate-900 uppercase tracking-widest flex items-center gap-2 group-hover:translate-x-2 transition-transform">Baca Detail <ExternalLink size={14} className="text-[#d9534f]" /></span>
-                    </div>
-                  </div>
-                )) : (
-                  <div className="col-span-full py-32 text-center text-slate-400 font-black uppercase tracking-widest bg-white rounded-[3rem] border-2 border-dashed border-slate-200">Belum ada pengumuman tersedia.</div>
-                )}
+                  )) : (
+                    <div className="col-span-full py-32 text-center text-slate-400 font-black uppercase tracking-widest bg-white rounded-[3rem] border-2 border-dashed border-slate-200">Belum ada pengumuman tersedia.</div>
+                  )}
+                </div>
               </div>
               <Footer activeView={activeView} setActiveView={setActiveView} />
             </div>
@@ -577,26 +608,28 @@ const Login: React.FC<LoginProps> = ({ onLogin, error, opds, progress, news }) =
 
           {/* VIEW: KONTAK */}
           {activeView === 'kontak' && (
-            <div className="w-full max-w-7xl animate-in fade-in slide-in-from-bottom-6 duration-700 px-4">
-              <div className="text-center mb-20">
-                <h1 className="text-5xl font-black text-slate-900 mb-4 uppercase tracking-tighter">Layanan Bantuan</h1>
-                <p className="text-slate-500 font-bold uppercase tracking-[0.4em]">Hubungi Kami Untuk Informasi Lebih Lanjut</p>
-                <div className="w-24 h-2 bg-[#d9534f] mx-auto mt-8 rounded-full shadow-lg shadow-red-900/20"></div>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-5xl mx-auto mb-20">
-                <div className="space-y-10">
-                  <ContactItem icon={<MapPin size={28} />} title="Kantor Pusat" text="Kantor Gubernur NTB, Biro Pengadaan Barang dan Jasa, Jl. Pejanggik No. 12, Mataram" color="blue" />
-                  <ContactItem icon={<Phone size={28} />} title="Hotline Monitoring" text="(0370) 6211234 • Senin - Jumat: 08:00 - 16:00 WITA" color="emerald" />
-                  <ContactItem icon={<Mail size={28} />} title="Surel Elektronik" text="biropbj@ntbprov.go.id • helpdesk.sirup@ntbprov.go.id" color="rose" />
+            <div className="w-full animate-in fade-in slide-in-from-bottom-6 duration-700">
+              <div className="max-w-7xl mx-auto px-4">
+                <div className="text-center mb-20">
+                  <h1 className="text-5xl font-black text-slate-900 mb-4 uppercase tracking-tighter">Layanan Bantuan</h1>
+                  <p className="text-slate-500 font-bold uppercase tracking-[0.4em]">Hubungi Kami Untuk Informasi Lebih Lanjut</p>
+                  <div className="w-24 h-2 bg-[#d9534f] mx-auto mt-8 rounded-full shadow-lg shadow-red-900/20"></div>
                 </div>
-                <div className="bg-slate-900 text-white p-12 rounded-[3.5rem] shadow-2xl space-y-8 relative overflow-hidden">
-                  <div className="absolute top-0 right-0 p-8 opacity-5"><ShieldCheck size={120} /></div>
-                  <div className="flex items-center gap-4 border-b border-white/10 pb-6">
-                    <div className="w-14 h-14 bg-emerald-500/20 text-emerald-400 rounded-2xl flex items-center justify-center"><AlertCircle size={32} /></div>
-                    <h3 className="text-2xl font-black uppercase tracking-tight italic">Helpdesk <span className="text-emerald-400">Whatsapp</span></h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-5xl mx-auto mb-20">
+                  <div className="space-y-10">
+                    <ContactItem icon={<MapPin size={28} />} title="Alamat Kantor" text="Kantor Gubernur NTB, Biro Pengadaan Barang dan Jasa, Jl. Pejanggik No. 12, Mataram" color="blue" />
+                    <ContactItem icon={<Phone size={28} />} title="Hotline Monitoring" text="(0370) 625274 • Senin - Jumat: 08:00 - 16:00 WITA" color="emerald" />
+                    <ContactItem icon={<Mail size={28} />} title="Email" text="biropbj@ntbprov.go.id • helpdesk.lpsentb@gmail.com" color="rose" />
                   </div>
-                  <p className="text-slate-400 font-medium leading-relaxed">Tim Helpdesk kami siap membantu Anda terkait kendala teknis input RUP, sinkronisasi SIPD, atau verifikasi data OPD.</p>
-                  <a href="https://wa.me/6281234567890" target="_blank" className="flex items-center justify-center gap-3 w-full bg-emerald-500 text-white py-5 rounded-[2rem] font-black uppercase tracking-widest hover:bg-emerald-600 transition-all shadow-xl shadow-emerald-900/20 active:scale-95">Chat Admin Sekarang</a>
+                  <div className="bg-slate-900 text-white p-12 rounded-[3.5rem] shadow-2xl space-y-8 relative overflow-hidden">
+                    <div className="absolute top-0 right-0 p-8 opacity-5"><ShieldCheck size={120} /></div>
+                    <div className="flex items-center gap-4 border-b border-white/10 pb-6">
+                      <div className="w-14 h-14 bg-emerald-500/20 text-emerald-400 rounded-2xl flex items-center justify-center"><AlertCircle size={32} /></div>
+                      <h3 className="text-2xl font-black uppercase tracking-tight italic">Helpdesk <span className="text-emerald-400">Whatsapp</span></h3>
+                    </div>
+                    <p className="text-slate-400 font-medium leading-relaxed">Tim Helpdesk kami siap membantu Anda terkait kendala teknis input RUP, sinkronisasi SIPD, atau verifikasi data OPD.</p>
+                    <a href="https://wa.me/6281139011909" target="_blank" className="flex items-center justify-center gap-3 w-full bg-emerald-500 text-white py-5 rounded-[2rem] font-black uppercase tracking-widest hover:bg-emerald-600 transition-all shadow-xl shadow-emerald-900/20 active:scale-95">Chat Admin Sekarang</a>
+                  </div>
                 </div>
               </div>
               <Footer activeView={activeView} setActiveView={setActiveView} />
@@ -632,119 +665,70 @@ const Login: React.FC<LoginProps> = ({ onLogin, error, opds, progress, news }) =
 };
 
 /**
- * Enhanced Professional Footer
+ * Enhanced Professional Footer (Sederhana - Full Width)
  */
 const Footer: React.FC<{ activeView: ViewState, setActiveView: (v: ViewState) => void }> = ({ activeView, setActiveView }) => {
-  const isDarkMode = activeView === 'login';
-  
   return (
-    <footer className={`w-full mt-auto pt-20 pb-12 border-t transition-all ${isDarkMode ? 'bg-transparent border-white/10 text-slate-400' : 'bg-slate-900 border-slate-800 text-slate-400'}`}>
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-16 mb-20">
-          
-          {/* Logo and Description */}
-          <div className="space-y-8">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-[#d9534f] rounded-2xl flex items-center justify-center shadow-lg shadow-red-900/30">
-                <FileText className="text-white" size={24} />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-2xl font-black tracking-tighter text-white leading-none">SiRUP NTB</span>
-                <span className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500 mt-1">Monitoring System</span>
-              </div>
+    <footer className={`shrink-0 w-full pt-16 pb-8 px-6 md:px-16 border-t transition-all ${activeView === 'login' ? 'bg-slate-950/80 border-white/10 text-slate-400' : 'bg-slate-900 border-slate-800 text-slate-400'}`}>
+      <div className="w-full grid grid-cols-1 md:grid-cols-4 gap-12">
+        <div className="col-span-1 md:col-span-1 space-y-6">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-[#d9534f] rounded-xl flex items-center justify-center shadow-lg shadow-red-900/20">
+              <FileText className="text-white" size={20} />
             </div>
-            <p className="text-sm leading-relaxed font-medium">
-              Aplikasi monitoring resmi Rencana Umum Pengadaan (RUP) Pemerintah Provinsi Nusa Tenggara Barat. Memberikan transparansi dan data real-time untuk kemajuan pembangunan daerah.
-            </p>
-            <div className="flex items-center gap-3">
-              <SocialIcon icon={<Facebook size={18}/>} />
-              <SocialIcon icon={<Twitter size={18}/>} />
-              <SocialIcon icon={<Instagram size={18}/>} />
-              <SocialIcon icon={<Youtube size={18}/>} />
-            </div>
+            <span className="text-2xl font-black tracking-tighter text-white">SiRUP NTB</span>
           </div>
-
-          {/* Navigation Links */}
-          <div className="space-y-8">
-            <h4 className="text-white font-black uppercase tracking-widest text-xs border-l-4 border-[#d9534f] pl-4">Menu Utama</h4>
-            <ul className="space-y-4">
-              <FooterLink label="Beranda" onClick={() => setActiveView('login')} />
-              <FooterLink label="Rekapitulasi Progres" onClick={() => setActiveView('rekap')} />
-              <FooterLink label="Pengumuman Terbaru" onClick={() => setActiveView('berita')} />
-              <FooterLink label="Hubungi Helpdesk" onClick={() => setActiveView('kontak')} />
-              <FooterLink label="Dashboard TV Monitor" onClick={() => setActiveView('tv')} icon={<Monitor size={14} className="text-[#d9534f]" />} />
-            </ul>
-          </div>
-
-          {/* External Gov Links */}
-          <div className="space-y-8">
-            <h4 className="text-white font-black uppercase tracking-widest text-xs border-l-4 border-blue-500 pl-4">Layanan Terkait</h4>
-            <ul className="space-y-4">
-              <FooterExternalLink label="SiRUP LKPP RI" href="https://sirup.lkpp.go.id" />
-              <FooterExternalLink label="LPSE Prov. NTB" href="https://lpse.ntbprov.go.id" />
-              <FooterExternalLink label="Portal Resmi NTB" href="https://ntbprov.go.id" />
-              <FooterExternalLink label="Biro Pengadaan NTB" href="https://biropbj.ntbprov.go.id" />
-              <FooterExternalLink label="SIPD RI (BPKAD)" href="https://sipd-ri.kemendagri.go.id" />
-            </ul>
-          </div>
-
-          {/* Contact Details */}
-          <div className="space-y-8">
-            <h4 className="text-white font-black uppercase tracking-widest text-xs border-l-4 border-emerald-500 pl-4">Hubungi Kami</h4>
-            <div className="space-y-6">
-              <div className="flex gap-4 group">
-                <div className="w-10 h-10 shrink-0 bg-white/5 rounded-xl flex items-center justify-center text-emerald-500 group-hover:bg-emerald-500 group-hover:text-white transition-all">
-                  <MapPin size={20} />
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-[10px] font-black uppercase text-slate-500 mb-1">Lokasi Kantor</span>
-                  <span className="text-xs font-bold leading-relaxed">Jl. Pejanggik No. 12, Mataram, Nusa Tenggara Barat</span>
-                </div>
-              </div>
-              <div className="flex gap-4 group">
-                <div className="w-10 h-10 shrink-0 bg-white/5 rounded-xl flex items-center justify-center text-blue-500 group-hover:bg-blue-500 group-hover:text-white transition-all">
-                  <Phone size={20} />
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-[10px] font-black uppercase text-slate-500 mb-1">Telepon</span>
-                  <span className="text-xs font-bold leading-relaxed">(0370) 6211234</span>
-                </div>
-              </div>
-              <div className="flex gap-4 group">
-                <div className="w-10 h-10 shrink-0 bg-white/5 rounded-xl flex items-center justify-center text-rose-500 group-hover:bg-rose-500 group-hover:text-white transition-all">
-                  <Mail size={20} />
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-[10px] font-black uppercase text-slate-500 mb-1">Email Resmi</span>
-                  <span className="text-xs font-bold leading-relaxed">biropbj@ntbprov.go.id</span>
-                </div>
-              </div>
-            </div>
+          <p className="text-sm leading-relaxed font-medium max-w-sm">
+            Sistem Informasi Monitoring Progres Rencana Umum Pengadaan (SiRUP) Pemerintah Provinsi Nusa Tenggara Barat.
+          </p>
+          <div className="flex items-center gap-4">
+            <SocialIcon icon={<Facebook size={18}/>} />
+            <SocialIcon icon={<Twitter size={18}/>} />
+            <SocialIcon icon={<Instagram size={18}/>} />
+            <SocialIcon icon={<Youtube size={18}/>} />
           </div>
         </div>
 
-        {/* Bottom Bar */}
-        <div className="pt-10 border-t border-white/5 flex flex-col lg:flex-row justify-between items-center gap-8">
-          <div className="flex flex-col items-center lg:items-start">
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] mb-2">
-              © 2026 Pemerintah Provinsi Nusa Tenggara Barat. <span className="text-slate-600 font-medium">Seluruh Hak Cipta Dilindungi.</span>
-            </p>
-            <div className="flex items-center gap-4 text-[9px] font-black text-slate-600 uppercase tracking-widest">
-              <span>Biro Pengadaan Barang dan Jasa</span>
-              <span className="w-1.5 h-1.5 bg-slate-800 rounded-full"></span>
-              <span>Sekretariat Daerah</span>
+        <div className="space-y-6">
+          <h4 className="text-white font-black uppercase tracking-widest text-xs">Menu Cepat</h4>
+          <ul className="space-y-3 text-sm font-bold">
+            <li><button onClick={() => setActiveView('rekap')} className="hover:text-white transition-colors text-left w-full">Rekap Data</button></li>
+            <li><button onClick={() => setActiveView('berita')} className="hover:text-white transition-colors text-left w-full">Pengumuman</button></li>
+            <li><button onClick={() => setActiveView('kontak')} className="hover:text-white transition-colors text-left w-full">Layanan Bantuan</button></li>
+            <li><button onClick={() => setActiveView('tv')} className="hover:text-white transition-colors flex items-center gap-2 text-left w-full">Monitor Publik <Monitor size={14}/></button></li>
+          </ul>
+        </div>
+
+        <div className="space-y-6">
+          <h4 className="text-white font-black uppercase tracking-widest text-xs">Tautan Eksternal</h4>
+          <ul className="space-y-3 text-sm font-bold">
+            <li><a href="https://sirup.inaproc.id/sirup/home/rekapitulasiindex" target="_blank" rel="noreferrer" className="hover:text-white transition-colors flex items-center gap-1.5">SiRUP Nasional <ExternalLink size={12}/></a></li>
+            <li><a href="https://spse.inaproc.id/ntbprov" target="_blank" rel="noreferrer" className="hover:text-white transition-colors flex items-center gap-1.5">LPSE Prov. NTB <ExternalLink size={12}/></a></li>
+            <li><a href="https://biropbj.ntbprov.go.id" target="_blank" rel="noreferrer" className="hover:text-white transition-colors flex items-center gap-1.5">Biro PBJ NTB <ExternalLink size={12}/></a></li>
+          </ul>
+        </div>
+
+        <div className="space-y-6">
+          <h4 className="text-white font-black uppercase tracking-widest text-xs">Alamat Kantor</h4>
+          <div className="space-y-4 text-sm font-medium">
+            <div className="flex gap-3">
+              <MapPin size={18} className="text-[#d9534f] shrink-0" />
+              <span className="leading-relaxed">Biro Pengadaan Barang dan Jasa Sekretariat Daerah Provinsi NTB, Jl. Pejanggik No. 12, Mataram</span>
+            </div>
+            <div className="flex gap-3">
+              <Phone size={18} className="text-[#d9534f] shrink-0" />
+              <span>(0370) 625274</span>
             </div>
           </div>
-          
-          <div className="flex items-center gap-8">
-            <div className="flex flex-col items-end">
-              <span className="text-[10px] font-black uppercase tracking-widest text-[#d9534f]">NTB Gemilang</span>
-              <span className="text-[9px] text-slate-600 font-bold uppercase">Membangun dari Desa</span>
-            </div>
-            <div className="w-12 h-12 bg-white/5 rounded-full p-2 flex items-center justify-center grayscale hover:grayscale-0 transition-all opacity-40 hover:opacity-100">
-               <Globe size={24} className="text-slate-400" />
-            </div>
-          </div>
+        </div>
+      </div>
+
+      <div className="w-full mt-16 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] font-black uppercase tracking-[0.2em]">
+        <p>© 2026 Biro PBJ NTB. Hak Cipta Dilindungi.</p>
+        <div className="flex items-center gap-4">
+          <span>LPSE Provinsi NTB</span>
+          <span className="w-1.5 h-1.5 bg-slate-700 rounded-full"></span>
+          <span>NTB Makmur Mendunia</span>
         </div>
       </div>
     </footer>
@@ -791,33 +775,6 @@ const SocialIcon: React.FC<{ icon: React.ReactNode }> = ({ icon }) => (
   <button className="w-10 h-10 bg-white/5 hover:bg-[#d9534f] text-slate-500 hover:text-white rounded-xl flex items-center justify-center transition-all duration-300 border border-white/5 hover:border-[#d9534f]/50">
     {icon}
   </button>
-);
-
-const FooterLink: React.FC<{ label: string, onClick: () => void, icon?: React.ReactNode }> = ({ label, onClick, icon }) => (
-  <li>
-    <button 
-      onClick={onClick} 
-      className="group flex items-center gap-2 text-sm font-bold text-slate-400 hover:text-white transition-all"
-    >
-      <ChevronRight size={14} className="text-slate-700 group-hover:text-[#d9534f] group-hover:translate-x-1 transition-all" />
-      {label}
-      {icon}
-    </button>
-  </li>
-);
-
-const FooterExternalLink: React.FC<{ label: string, href: string }> = ({ label, href }) => (
-  <li>
-    <a 
-      href={href} 
-      target="_blank" 
-      rel="noreferrer" 
-      className="group flex items-center gap-2 text-sm font-bold text-slate-400 hover:text-white transition-all"
-    >
-      <ExternalLink size={14} className="text-slate-700 group-hover:text-blue-500 group-hover:scale-110 transition-all" />
-      {label}
-    </a>
-  </li>
 );
 
 export default Login;
