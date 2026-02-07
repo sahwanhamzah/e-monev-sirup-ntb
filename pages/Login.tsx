@@ -512,7 +512,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, error, opds, progress, news }) =
                           <th rowSpan={3} className="border border-slate-400 p-4 min-w-[320px] text-left">Satuan Kerja</th>
                           <th rowSpan={3} className="border border-slate-400 p-4 w-32">Pagu Pengadaan</th>
                           <th colSpan={8} className="border border-slate-400 p-4 bg-[#00B0F0] text-white">TERUMUMKAN DI SIRUP</th>
-                          <th rowSpan={3} className="border border-slate-400 p-4 w-32 bg-[#00B0F0] text-white">Persentase Hari Ini</th>
+                          <th rowSpan={3} className="border border-slate-400 p-4 w-32 bg-[#00B0F0] text-white">Persentase %</th>
                         </tr>
                         <tr className="bg-[#FFC000] text-slate-900 text-center font-black uppercase border-b border-slate-400">
                           <th colSpan={2} className="border border-slate-400 p-2">Penyedia</th>
