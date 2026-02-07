@@ -78,7 +78,7 @@ const OfficialReport: React.FC<OfficialReportProps> = ({ opds, progress, setting
           <th rowSpan={3} className="border border-black p-1 text-left min-w-[200px]">Satuan Kerja</th>
           <th rowSpan={3} className="border border-black p-1 w-20">Pagu Pengadaan</th>
           <th colSpan={8} className="border border-black p-1 bg-[#00B0F0] text-white">TERUMUMKAN DI SIRUP</th>
-          <th rowSpan={3} className="border border-black p-1 w-16 bg-[#00B0F0] text-white">Persentase (%) Hari Ini</th>
+          <th rowSpan={3} className="border border-black p-1 w-16 bg-[#00B0F0] text-white">Persentase (%)</th>
         </tr>
         <tr className="bg-[#FFC000] text-center font-bold">
           <th colSpan={2} className="border border-black p-1">Penyedia</th>
