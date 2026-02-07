@@ -297,7 +297,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, error, opds, progress, news }) =
                 <MonitorCardTV label="Total Progres Provinsi" value={formatPercent(avgPercent)} sub="Realisasi Input Pagu Nasional" icon={<Percent size={32}/>} color="emerald" />
                 <MonitorCardTV label="Pagu Terumumkan" value={`Rp ${formatCurrencyMillions(totalPaguTerinput)} Jt`} sub={`Target: Rp ${formatCurrencyMillions(totalPaguMurni)} Jt`} icon={<TrendingUp size={32}/>} color="blue" />
                 <MonitorCardTV label="Total Paket RUP" value={totalPaket.toLocaleString('id-ID')} sub="Pen + Swa + PdS" icon={<Package size={32}/>} color="indigo" />
-                <MonitorCardTV label="Satker Tuntas (100%)" value={`${completedOPDs.length} OPD`} sub="Penyelesaian Input RUP" icon={<Award size={32}/>} color="amber" />
+                <MonitorCardTV label="OPD Tuntas (100%)" value={`${completedOPDs.length} OPD`} sub="Penyelesaian Input RUP" icon={<Award size={32}/>} color="amber" />
               </div>
 
               {/* MAIN CONTENT SPLIT */}
